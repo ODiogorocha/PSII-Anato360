@@ -1,10 +1,17 @@
 # Anato360 - Sistema Interativo para o Estudo da Anatomia Veterinária
 
 ## Desenvolvedores
-[Diogo Rocha](https://github.com/ODiogorocha)
-[Gabriel Quadro](https://github.com/GabrieldeQuadro)
-[Filipe Kaizer](https://github.com/filipeKaizer)
-[Wesley Meneses](https://github.com/WeslleyHBM)
+
+<p align="center">
+  <a href="https://github.com/ODiogorocha">Diogo Rocha</a>
+  &emsp;&emsp;&emsp;&emsp;
+  <a href="https://github.com/GabrieldeQuadro">Gabriel Quadro</a>
+  &emsp;&emsp;&emsp;&emsp;
+  <a href="https://github.com/filipeKaizer">Filipe Kaizer</a>
+  &emsp;&emsp;&emsp;&emsp;
+  <a href="https://github.com/WeslleyHBM">Wesley Meneses</a>
+</p>
+
 
 ### configurações de branch 
 
