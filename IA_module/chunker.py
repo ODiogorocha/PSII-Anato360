@@ -1,7 +1,3 @@
-"""
-Divisão de texto longo em pedaços menores (chunks) com sobreposição,
-para permitir busca por similaridade em granularidade útil.
-"""
 from __future__ import annotations
 
 from typing import List

@@ -1,6 +1,3 @@
-"""
-Configurações do módulo de assistente de estudos baseado em PDF + Ollama.
-"""
 from dataclasses import dataclass
 
 
