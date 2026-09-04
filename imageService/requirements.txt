@@ -1,0 +1,13 @@
+# Processamento numérico e visão computacional
+numpy>=1.26,<3
+opencv-python-headless>=4.10,<6
+
+# OCR
+easyocr>=1.7.2,<2
+Pillow>=10,<13
+
+# Classificação zero-shot de imagens anatômicas
+clip @ git+https://github.com/openai/CLIP.git@d05afc436d78f1c48dc0dbf8e5980a9d471f35f6
+
+# Cliente opcional usado quando ollamaClient/ollama_model são informados
+# ollama>=0.4,<1
