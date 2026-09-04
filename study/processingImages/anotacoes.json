@@ -1,0 +1,581 @@
+{
+  "method": "arrows",
+  "annotations": [
+    {
+      "name": "DISTRIBUIÇÃO NO CORPO",
+      "confidence": 0.9858953260352519,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 376,
+        "y1": 15,
+        "x2": 615,
+        "y2": 53
+      },
+      "targetPoint": {
+        "x": 363,
+        "y": 40
+      },
+      "normalizedTargetPoint": {
+        "x": 0.5636645962732919,
+        "y": 0.09389671361502347
+      },
+      "arrow": {
+        "origin": {
+          "x": 610,
+          "y": 32
+        },
+        "target": {
+          "x": 363,
+          "y": 40
+        },
+        "distanceFromText": 0.0,
+        "length": 247.12952069714376
+      }
+    },
+    {
+      "name": "Artéria aorta",
+      "confidence": 0.9993060849732326,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 83,
+        "y1": 37,
+        "x2": 173,
+        "y2": 55
+      },
+      "targetPoint": {
+        "x": 169,
+        "y": 44
+      },
+      "normalizedTargetPoint": {
+        "x": 0.26242236024844723,
+        "y": 0.10328638497652583
+      },
+      "arrow": {
+        "origin": {
+          "x": 83,
+          "y": 49
+        },
+        "target": {
+          "x": 169,
+          "y": 44
+        },
+        "distanceFromText": 0.0,
+        "length": 86.14522621712709
+      }
+    },
+    {
+      "name": "SANGUE RICO EM 02 ENTRANDONO CORAÇAO",
+      "confidence": 0.9110971170597629,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 347,
+        "y1": 67,
+        "x2": 631,
+        "y2": 85
+      },
+      "targetPoint": {
+        "x": 626,
+        "y": 78
+      },
+      "normalizedTargetPoint": {
+        "x": 0.9720496894409938,
+        "y": 0.18309859154929578
+      },
+      "arrow": {
+        "origin": {
+          "x": 350,
+          "y": 73
+        },
+        "target": {
+          "x": 626,
+          "y": 78
+        },
+        "distanceFromText": 0.0,
+        "length": 276.04528613979267
+      }
+    },
+    {
+      "name": "Veia pulmonar superior",
+      "confidence": 0.9981368647193111,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 475,
+        "y1": 135,
+        "x2": 637,
+        "y2": 153
+      },
+      "targetPoint": {
+        "x": 449,
+        "y": 144
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6972049689440993,
+        "y": 0.3380281690140845
+      },
+      "arrow": {
+        "origin": {
+          "x": 591,
+          "y": 140
+        },
+        "target": {
+          "x": 449,
+          "y": 144
+        },
+        "distanceFromText": 0.0,
+        "length": 142.0563268566381
+      }
+    },
+    {
+      "name": "Veia pulmonar superior",
+      "confidence": 0.9554568522538452,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 27,
+        "y1": 143,
+        "x2": 189,
+        "y2": 164
+      },
+      "targetPoint": {
+        "x": 182,
+        "y": 157
+      },
+      "normalizedTargetPoint": {
+        "x": 0.2826086956521739,
+        "y": 0.3685446009389671
+      },
+      "arrow": {
+        "origin": {
+          "x": 29,
+          "y": 154
+        },
+        "target": {
+          "x": 182,
+          "y": 157
+        },
+        "distanceFromText": 0.0,
+        "length": 153.0294089382822
+      }
+    },
+    {
+      "name": "Esquerdo",
+      "confidence": 0.9963508212006996,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 305,
+        "y1": 155,
+        "x2": 357,
+        "y2": 169
+      },
+      "targetPoint": {
+        "x": 420,
+        "y": 350
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6521739130434783,
+        "y": 0.8215962441314554
+      },
+      "arrow": {
+        "origin": {
+          "x": 353,
+          "y": 158
+        },
+        "target": {
+          "x": 420,
+          "y": 350
+        },
+        "distanceFromText": 0.0,
+        "length": 203.35437049643167
+      }
+    },
+    {
+      "name": "esquerda",
+      "confidence": 0.9999418787962734,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 523,
+        "y1": 155,
+        "x2": 589,
+        "y2": 171
+      },
+      "targetPoint": {
+        "x": 585,
+        "y": 165
+      },
+      "normalizedTargetPoint": {
+        "x": 0.9083850931677019,
+        "y": 0.3873239436619718
+      },
+      "arrow": {
+        "origin": {
+          "x": 524,
+          "y": 163
+        },
+        "target": {
+          "x": 585,
+          "y": 165
+        },
+        "distanceFromText": 0.0,
+        "length": 61.032778078668514
+      }
+    },
+    {
+      "name": "direita",
+      "confidence": 0.9999637290021892,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 85,
+        "y1": 165,
+        "x2": 131,
+        "y2": 181
+      },
+      "targetPoint": {
+        "x": 128,
+        "y": 176
+      },
+      "normalizedTargetPoint": {
+        "x": 0.19875776397515527,
+        "y": 0.4131455399061033
+      },
+      "arrow": {
+        "origin": {
+          "x": 89,
+          "y": 167
+        },
+        "target": {
+          "x": 128,
+          "y": 176
+        },
+        "distanceFromText": 0.0,
+        "length": 40.024992192379
+      }
+    },
+    {
+      "name": "Veia pulmonar inferior",
+      "confidence": 0.9926091496573599,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 485,
+        "y1": 179,
+        "x2": 641,
+        "y2": 197
+      },
+      "targetPoint": {
+        "x": 419,
+        "y": 182
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6506211180124224,
+        "y": 0.4272300469483568
+      },
+      "arrow": {
+        "origin": {
+          "x": 638,
+          "y": 186
+        },
+        "target": {
+          "x": 419,
+          "y": 182
+        },
+        "distanceFromText": 0.0,
+        "length": 219.03652663425797
+      }
+    },
+    {
+      "name": "Aurio",
+      "confidence": 0.9203544020272606,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 207,
+        "y1": 197,
+        "x2": 237,
+        "y2": 211
+      },
+      "targetPoint": {
+        "x": 272,
+        "y": 243
+      },
+      "normalizedTargetPoint": {
+        "x": 0.422360248447205,
+        "y": 0.5704225352112676
+      },
+      "arrow": {
+        "origin": {
+          "x": 230,
+          "y": 201
+        },
+        "target": {
+          "x": 272,
+          "y": 243
+        },
+        "distanceFromText": 0.0,
+        "length": 59.39696961966999
+      }
+    },
+    {
+      "name": "esquerda",
+      "confidence": 0.9999722250670585,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 530,
+        "y1": 197,
+        "x2": 597,
+        "y2": 218
+      },
+      "targetPoint": {
+        "x": 590,
+        "y": 211
+      },
+      "normalizedTargetPoint": {
+        "x": 0.9161490683229814,
+        "y": 0.4953051643192488
+      },
+      "arrow": {
+        "origin": {
+          "x": 532,
+          "y": 209
+        },
+        "target": {
+          "x": 590,
+          "y": 211
+        },
+        "distanceFromText": 0.0,
+        "length": 58.034472514187634
+      }
+    },
+    {
+      "name": "Dircito",
+      "confidence": 0.8886820726816687,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 201,
+        "y1": 213,
+        "x2": 241,
+        "y2": 227
+      },
+      "targetPoint": {
+        "x": 111,
+        "y": 237
+      },
+      "normalizedTargetPoint": {
+        "x": 0.17236024844720496,
+        "y": 0.5563380281690141
+      },
+      "arrow": {
+        "origin": {
+          "x": 211,
+          "y": 213
+        },
+        "target": {
+          "x": 111,
+          "y": 237
+        },
+        "distanceFromText": 0.0,
+        "length": 102.83968105745953
+      }
+    },
+    {
+      "name": "Veia pulmonar inferior",
+      "confidence": 0.8904839928581666,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 21,
+        "y1": 241,
+        "x2": 177,
+        "y2": 261
+      },
+      "targetPoint": {
+        "x": 109,
+        "y": 256
+      },
+      "normalizedTargetPoint": {
+        "x": 0.16925465838509315,
+        "y": 0.6009389671361502
+      },
+      "arrow": {
+        "origin": {
+          "x": 21,
+          "y": 246
+        },
+        "target": {
+          "x": 109,
+          "y": 256
+        },
+        "distanceFromText": 0.0,
+        "length": 88.56635930193812
+      }
+    },
+    {
+      "name": "direita",
+      "confidence": 0.9999566549816858,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 75,
+        "y1": 263,
+        "x2": 121,
+        "y2": 277
+      },
+      "targetPoint": {
+        "x": 40,
+        "y": 244
+      },
+      "normalizedTargetPoint": {
+        "x": 0.062111801242236024,
+        "y": 0.5727699530516432
+      },
+      "arrow": {
+        "origin": {
+          "x": 105,
+          "y": 274
+        },
+        "target": {
+          "x": 40,
+          "y": 244
+        },
+        "distanceFromText": 0.0,
+        "length": 71.58910531638176
+      }
+    },
+    {
+      "name": "Valva mitral",
+      "confidence": 0.9997898939558748,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 491,
+        "y1": 261,
+        "x2": 575,
+        "y2": 279
+      },
+      "targetPoint": {
+        "x": 383,
+        "y": 243
+      },
+      "normalizedTargetPoint": {
+        "x": 0.59472049689441,
+        "y": 0.5704225352112676
+      },
+      "arrow": {
+        "origin": {
+          "x": 511,
+          "y": 274
+        },
+        "target": {
+          "x": 383,
+          "y": 243
+        },
+        "distanceFromText": 0.0,
+        "length": 131.70041761513136
+      }
+    },
+    {
+      "name": "Ventriculo",
+      "confidence": 0.9610728216983682,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 243,
+        "y1": 281,
+        "x2": 301,
+        "y2": 295
+      },
+      "targetPoint": {
+        "x": 184,
+        "y": 274
+      },
+      "normalizedTargetPoint": {
+        "x": 0.2857142857142857,
+        "y": 0.6431924882629108
+      },
+      "arrow": {
+        "origin": {
+          "x": 243,
+          "y": 277
+        },
+        "target": {
+          "x": 184,
+          "y": 274
+        },
+        "distanceFromText": 4.0,
+        "length": 59.07622195096772
+      }
+    },
+    {
+      "name": "Valva aórtica",
+      "confidence": 0.7156549441987697,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 455,
+        "y1": 287,
+        "x2": 545,
+        "y2": 303
+      },
+      "targetPoint": {
+        "x": 375,
+        "y": 279
+      },
+      "normalizedTargetPoint": {
+        "x": 0.5822981366459627,
+        "y": 0.6549295774647887
+      },
+      "arrow": {
+        "origin": {
+          "x": 541,
+          "y": 299
+        },
+        "target": {
+          "x": 375,
+          "y": 279
+        },
+        "distanceFromText": 0.0,
+        "length": 167.20047846821492
+      }
+    },
+    {
+      "name": "Direito",
+      "confidence": 0.996868043773236,
+      "detectionType": "arrow",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 253,
+        "y1": 295,
+        "x2": 293,
+        "y2": 309
+      },
+      "targetPoint": {
+        "x": 249,
+        "y": 345
+      },
+      "normalizedTargetPoint": {
+        "x": 0.38664596273291924,
+        "y": 0.8098591549295775
+      },
+      "arrow": {
+        "origin": {
+          "x": 243,
+          "y": 315
+        },
+        "target": {
+          "x": 249,
+          "y": 345
+        },
+        "distanceFromText": 11.661903789690601,
+        "length": 30.59411708155671
+      }
+    }
+  ]
+}

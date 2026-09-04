@@ -1,0 +1,952 @@
+{
+  "method": "arrows",
+  "annotations": [
+    {
+      "name": "tórax",
+      "confidence": 0.9792435067478593,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 261,
+        "y1": 57,
+        "x2": 293,
+        "y2": 74
+      },
+      "targetPoint": {
+        "x": 277,
+        "y": 151
+      },
+      "normalizedTargetPoint": {
+        "x": 0.515828677839851,
+        "y": 0.4206128133704735
+      },
+      "arrow": {
+        "origin": {
+          "x": 277,
+          "y": 68
+        },
+        "target": {
+          "x": 277,
+          "y": 151
+        },
+        "distanceFromText": 0.0,
+        "length": 83.0,
+        "alignment": 1.0
+      }
+    },
+    {
+      "name": "vértebras",
+      "confidence": 0.9995627720032239,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 332,
+        "y1": 53,
+        "x2": 385,
+        "y2": 69
+      },
+      "targetPoint": {
+        "x": 357,
+        "y": 114
+      },
+      "normalizedTargetPoint": {
+        "x": 0.664804469273743,
+        "y": 0.31754874651810583
+      },
+      "arrow": {
+        "origin": {
+          "x": 358,
+          "y": 71
+        },
+        "target": {
+          "x": 357,
+          "y": 114
+        },
+        "distanceFromText": 2.0,
+        "length": 43.01162633521314,
+        "alignment": 0.9997296929359436
+      }
+    },
+    {
+      "name": "cervlcals",
+      "confidence": 0.9976535378460165,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 332,
+        "y1": 67,
+        "x2": 382,
+        "y2": 82
+      },
+      "targetPoint": {
+        "x": 376,
+        "y": 97
+      },
+      "normalizedTargetPoint": {
+        "x": 0.7001862197392924,
+        "y": 0.27019498607242337
+      },
+      "arrow": {
+        "origin": {
+          "x": 381,
+          "y": 82
+        },
+        "target": {
+          "x": 376,
+          "y": 97
+        },
+        "distanceFromText": 0.0,
+        "length": 15.811388300841896,
+        "alignment": 0.0
+      }
+    },
+    {
+      "name": "crânlo",
+      "confidence": 0.9992393672738987,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 430,
+        "y1": 67,
+        "x2": 468,
+        "y2": 83
+      },
+      "targetPoint": {
+        "x": 396,
+        "y": 110
+      },
+      "normalizedTargetPoint": {
+        "x": 0.7374301675977654,
+        "y": 0.3064066852367688
+      },
+      "arrow": {
+        "origin": {
+          "x": 424,
+          "y": 81
+        },
+        "target": {
+          "x": 396,
+          "y": 110
+        },
+        "distanceFromText": 6.0,
+        "length": 40.311288741492746,
+        "alignment": 0.8433037400245667
+      }
+    },
+    {
+      "name": "sacro",
+      "confidence": 0.9916685032758025,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 180,
+        "y1": 86,
+        "x2": 214,
+        "y2": 100
+      },
+      "targetPoint": {
+        "x": 197,
+        "y": 144
+      },
+      "normalizedTargetPoint": {
+        "x": 0.36685288640595903,
+        "y": 0.4011142061281337
+      },
+      "arrow": {
+        "origin": {
+          "x": 198,
+          "y": 94
+        },
+        "target": {
+          "x": 197,
+          "y": 144
+        },
+        "distanceFromText": 0.0,
+        "length": 50.00999900019995,
+        "alignment": 1.0
+      }
+    },
+    {
+      "name": "vórtebras",
+      "confidence": 0.8306261219520139,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 286,
+        "y1": 85,
+        "x2": 338,
+        "y2": 101
+      },
+      "targetPoint": {
+        "x": 304,
+        "y": 158
+      },
+      "normalizedTargetPoint": {
+        "x": 0.5661080074487895,
+        "y": 0.4401114206128134
+      },
+      "arrow": {
+        "origin": {
+          "x": 306,
+          "y": 102
+        },
+        "target": {
+          "x": 304,
+          "y": 158
+        },
+        "distanceFromText": 1.0,
+        "length": 56.0357029044876,
+        "alignment": 0.8513181805610657
+      }
+    },
+    {
+      "name": "vértebras",
+      "confidence": 0.7788649147837429,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 216,
+        "y1": 102,
+        "x2": 265,
+        "y2": 115
+      },
+      "targetPoint": {
+        "x": 234,
+        "y": 141
+      },
+      "normalizedTargetPoint": {
+        "x": 0.43575418994413406,
+        "y": 0.39275766016713093
+      },
+      "arrow": {
+        "origin": {
+          "x": 238,
+          "y": 117
+        },
+        "target": {
+          "x": 234,
+          "y": 141
+        },
+        "distanceFromText": 2.0,
+        "length": 24.331050121192877,
+        "alignment": 0.9985681176185608
+      }
+    },
+    {
+      "name": "toráclcas",
+      "confidence": 0.9819056947399866,
+      "detectionType": "arrow_not_found",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 285,
+        "y1": 97,
+        "x2": 337,
+        "y2": 113
+      },
+      "targetPoint": null,
+      "normalizedTargetPoint": null
+    },
+    {
+      "name": "maxllar",
+      "confidence": 0.9989562167057582,
+      "detectionType": "arrow_not_found",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 451,
+        "y1": 103,
+        "x2": 491,
+        "y2": 115
+      },
+      "targetPoint": null,
+      "normalizedTargetPoint": null
+    },
+    {
+      "name": "vértobras",
+      "confidence": 0.9259755460455232,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 130,
+        "y1": 106,
+        "x2": 182,
+        "y2": 124
+      },
+      "targetPoint": {
+        "x": 152,
+        "y": 161
+      },
+      "normalizedTargetPoint": {
+        "x": 0.28305400372439476,
+        "y": 0.44846796657381616
+      },
+      "arrow": {
+        "origin": {
+          "x": 155,
+          "y": 123
+        },
+        "target": {
+          "x": 152,
+          "y": 161
+        },
+        "distanceFromText": 0.0,
+        "length": 38.118237105091836,
+        "alignment": 0.9989618062973022
+      }
+    },
+    {
+      "name": "lombares",
+      "confidence": 0.6913852503952054,
+      "detectionType": "arrow_not_found",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 214,
+        "y1": 114,
+        "x2": 266,
+        "y2": 128
+      },
+      "targetPoint": null,
+      "normalizedTargetPoint": null
+    },
+    {
+      "name": "caudals",
+      "confidence": 0.9989621662134776,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 129,
+        "y1": 119,
+        "x2": 175,
+        "y2": 135
+      },
+      "targetPoint": {
+        "x": 150,
+        "y": 154
+      },
+      "normalizedTargetPoint": {
+        "x": 0.27932960893854747,
+        "y": 0.42896935933147634
+      },
+      "arrow": {
+        "origin": {
+          "x": 150,
+          "y": 139
+        },
+        "target": {
+          "x": 150,
+          "y": 154
+        },
+        "distanceFromText": 4.0,
+        "length": 15.0,
+        "alignment": 0.986393928527832
+      }
+    },
+    {
+      "name": "mandibula",
+      "confidence": 0.9878505242093687,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 452,
+        "y1": 150,
+        "x2": 508,
+        "y2": 163
+      },
+      "targetPoint": {
+        "x": 404,
+        "y": 157
+      },
+      "normalizedTargetPoint": {
+        "x": 0.7523277467411545,
+        "y": 0.4373259052924791
+      },
+      "arrow": {
+        "origin": {
+          "x": 459,
+          "y": 159
+        },
+        "target": {
+          "x": 404,
+          "y": 157
+        },
+        "distanceFromText": 0.0,
+        "length": 55.036351623268054,
+        "alignment": 0.9841564297676086
+      }
+    },
+    {
+      "name": "polve",
+      "confidence": 0.9906170463842424,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 53,
+        "y1": 168,
+        "x2": 87,
+        "y2": 186
+      },
+      "targetPoint": {
+        "x": 158,
+        "y": 177
+      },
+      "normalizedTargetPoint": {
+        "x": 0.2942271880819367,
+        "y": 0.49303621169916434
+      },
+      "arrow": {
+        "origin": {
+          "x": 82,
+          "y": 178
+        },
+        "target": {
+          "x": 158,
+          "y": 177
+        },
+        "distanceFromText": 0.0,
+        "length": 76.00657866263946,
+        "alignment": 0.9953669309616089
+      }
+    },
+    {
+      "name": "oscápula",
+      "confidence": 0.9970153372095829,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 450,
+        "y1": 168,
+        "x2": 501,
+        "y2": 186
+      },
+      "targetPoint": {
+        "x": 371,
+        "y": 178
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6908752327746741,
+        "y": 0.4958217270194986
+      },
+      "arrow": {
+        "origin": {
+          "x": 455,
+          "y": 178
+        },
+        "target": {
+          "x": 371,
+          "y": 178
+        },
+        "distanceFromText": 0.0,
+        "length": 84.0,
+        "alignment": 0.9988681077957153
+      }
+    },
+    {
+      "name": "fêmur",
+      "confidence": 0.9802617159795511,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 39,
+        "y1": 196,
+        "x2": 75,
+        "y2": 213
+      },
+      "targetPoint": {
+        "x": 176,
+        "y": 206
+      },
+      "normalizedTargetPoint": {
+        "x": 0.32774674115456237,
+        "y": 0.5738161559888579
+      },
+      "arrow": {
+        "origin": {
+          "x": 71,
+          "y": 204
+        },
+        "target": {
+          "x": 176,
+          "y": 206
+        },
+        "distanceFromText": 0.0,
+        "length": 105.01904589168576,
+        "alignment": 0.9998186826705933
+      }
+    },
+    {
+      "name": "úmcro",
+      "confidence": 0.9889326369387454,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 452,
+        "y1": 215,
+        "x2": 486,
+        "y2": 228
+      },
+      "targetPoint": {
+        "x": 344,
+        "y": 225
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6405959031657356,
+        "y": 0.6267409470752089
+      },
+      "arrow": {
+        "origin": {
+          "x": 453,
+          "y": 224
+        },
+        "target": {
+          "x": 344,
+          "y": 225
+        },
+        "distanceFromText": 0.0,
+        "length": 109.00458705944443,
+        "alignment": 0.9933740496635437
+      }
+    },
+    {
+      "name": "Patela",
+      "confidence": 0.8790338549870336,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 39,
+        "y1": 224,
+        "x2": 74,
+        "y2": 238
+      },
+      "targetPoint": {
+        "x": 172,
+        "y": 231
+      },
+      "normalizedTargetPoint": {
+        "x": 0.3202979515828678,
+        "y": 0.6434540389972145
+      },
+      "arrow": {
+        "origin": {
+          "x": 72,
+          "y": 229
+        },
+        "target": {
+          "x": 172,
+          "y": 231
+        },
+        "distanceFromText": 0.0,
+        "length": 100.0199980003999,
+        "alignment": 0.9895992279052734
+      }
+    },
+    {
+      "name": "fíbula",
+      "confidence": 0.9912872620678151,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 26,
+        "y1": 239,
+        "x2": 61,
+        "y2": 255
+      },
+      "targetPoint": {
+        "x": 149,
+        "y": 250
+      },
+      "normalizedTargetPoint": {
+        "x": 0.2774674115456238,
+        "y": 0.6963788300835655
+      },
+      "arrow": {
+        "origin": {
+          "x": 49,
+          "y": 250
+        },
+        "target": {
+          "x": 149,
+          "y": 250
+        },
+        "distanceFromText": 0.0,
+        "length": 100.0,
+        "alignment": 0.857492983341217
+      }
+    },
+    {
+      "name": "costclas",
+      "confidence": 0.8299455810790826,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 218,
+        "y1": 236,
+        "x2": 263,
+        "y2": 249
+      },
+      "targetPoint": {
+        "x": 285,
+        "y": 198
+      },
+      "normalizedTargetPoint": {
+        "x": 0.5307262569832403,
+        "y": 0.5515320334261838
+      },
+      "arrow": {
+        "origin": {
+          "x": 246,
+          "y": 237
+        },
+        "target": {
+          "x": 285,
+          "y": 198
+        },
+        "distanceFromText": 0.0,
+        "length": 55.154328932550705,
+        "alignment": 0.9958932399749756
+      }
+    },
+    {
+      "name": "tíbla",
+      "confidence": 0.9440899374916534,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 34,
+        "y1": 256,
+        "x2": 62,
+        "y2": 270
+      },
+      "targetPoint": {
+        "x": 103,
+        "y": 262
+      },
+      "normalizedTargetPoint": {
+        "x": 0.19180633147113593,
+        "y": 0.7298050139275766
+      },
+      "arrow": {
+        "origin": {
+          "x": 51,
+          "y": 261
+        },
+        "target": {
+          "x": 103,
+          "y": 262
+        },
+        "distanceFromText": 0.0,
+        "length": 52.009614495783374,
+        "alignment": 0.8212311267852783
+      }
+    },
+    {
+      "name": "cstcrno",
+      "confidence": 0.9570201962394294,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 249,
+        "y1": 258,
+        "x2": 291,
+        "y2": 270
+      },
+      "targetPoint": {
+        "x": 299,
+        "y": 237
+      },
+      "normalizedTargetPoint": {
+        "x": 0.5567970204841713,
+        "y": 0.6601671309192201
+      },
+      "arrow": {
+        "origin": {
+          "x": 281,
+          "y": 253
+        },
+        "target": {
+          "x": 299,
+          "y": 237
+        },
+        "distanceFromText": 5.0,
+        "length": 24.08318915758459,
+        "alignment": 0.9982743859291077
+      }
+    },
+    {
+      "name": "rádlo",
+      "confidence": 0.9785684794635132,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 452,
+        "y1": 252,
+        "x2": 483,
+        "y2": 267
+      },
+      "targetPoint": {
+        "x": 346,
+        "y": 259
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6443202979515829,
+        "y": 0.7214484679665738
+      },
+      "arrow": {
+        "origin": {
+          "x": 456,
+          "y": 259
+        },
+        "target": {
+          "x": 346,
+          "y": 259
+        },
+        "distanceFromText": 0.0,
+        "length": 110.0,
+        "alignment": 0.9965457320213318
+      }
+    },
+    {
+      "name": "tarso",
+      "confidence": 0.9992155306843625,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 34,
+        "y1": 274,
+        "x2": 65,
+        "y2": 288
+      },
+      "targetPoint": {
+        "x": 83,
+        "y": 282
+      },
+      "normalizedTargetPoint": {
+        "x": 0.15456238361266295,
+        "y": 0.7855153203342619
+      },
+      "arrow": {
+        "origin": {
+          "x": 58,
+          "y": 284
+        },
+        "target": {
+          "x": 83,
+          "y": 282
+        },
+        "distanceFromText": 0.0,
+        "length": 25.079872407968907,
+        "alignment": 0.9053468704223633
+      }
+    },
+    {
+      "name": "ulna",
+      "confidence": 0.9875374436378479,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 452,
+        "y1": 272,
+        "x2": 480,
+        "y2": 286
+      },
+      "targetPoint": {
+        "x": 338,
+        "y": 281
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6294227188081937,
+        "y": 0.7827298050139275
+      },
+      "arrow": {
+        "origin": {
+          "x": 454,
+          "y": 281
+        },
+        "target": {
+          "x": 338,
+          "y": 281
+        },
+        "distanceFromText": 0.0,
+        "length": 116.0,
+        "alignment": 0.986393928527832
+      }
+    },
+    {
+      "name": "motatarso",
+      "confidence": 0.7235394222183078,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 12,
+        "y1": 292,
+        "x2": 66,
+        "y2": 306
+      },
+      "targetPoint": {
+        "x": 123,
+        "y": 298
+      },
+      "normalizedTargetPoint": {
+        "x": 0.22905027932960895,
+        "y": 0.83008356545961
+      },
+      "arrow": {
+        "origin": {
+          "x": 52,
+          "y": 298
+        },
+        "target": {
+          "x": 123,
+          "y": 298
+        },
+        "distanceFromText": 0.0,
+        "length": 71.0,
+        "alignment": 0.9970544576644897
+      }
+    },
+    {
+      "name": "carpo",
+      "confidence": 0.9995540865701589,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 453,
+        "y1": 298,
+        "x2": 487,
+        "y2": 314
+      },
+      "targetPoint": {
+        "x": 344,
+        "y": 304
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6405959031657356,
+        "y": 0.8467966573816156
+      },
+      "arrow": {
+        "origin": {
+          "x": 457,
+          "y": 304
+        },
+        "target": {
+          "x": 344,
+          "y": 304
+        },
+        "distanceFromText": 0.0,
+        "length": 113.0,
+        "alignment": 0.9883716702461243
+      }
+    },
+    {
+      "name": "falanges",
+      "confidence": 0.9952757271195423,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 22,
+        "y1": 312,
+        "x2": 73,
+        "y2": 332
+      },
+      "targetPoint": {
+        "x": 124,
+        "y": 322
+      },
+      "normalizedTargetPoint": {
+        "x": 0.2309124767225326,
+        "y": 0.8969359331476323
+      },
+      "arrow": {
+        "origin": {
+          "x": 67,
+          "y": 323
+        },
+        "target": {
+          "x": 124,
+          "y": 322
+        },
+        "distanceFromText": 0.0,
+        "length": 57.0087712549569,
+        "alignment": 0.9975422024726868
+      }
+    },
+    {
+      "name": "mctacarpo",
+      "confidence": 0.9949948094344265,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 452,
+        "y1": 312,
+        "x2": 508,
+        "y2": 326
+      },
+      "targetPoint": {
+        "x": 344,
+        "y": 316
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6405959031657356,
+        "y": 0.8802228412256268
+      },
+      "arrow": {
+        "origin": {
+          "x": 466,
+          "y": 315
+        },
+        "target": {
+          "x": 344,
+          "y": 316
+        },
+        "distanceFromText": 0.0,
+        "length": 122.00409829181969,
+        "alignment": 0.9592399001121521
+      }
+    },
+    {
+      "name": "falanges",
+      "confidence": 0.6645609506113714,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 452,
+        "y1": 326,
+        "x2": 500,
+        "y2": 340
+      },
+      "targetPoint": {
+        "x": 367,
+        "y": 333
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6834264432029795,
+        "y": 0.9275766016713092
+      },
+      "arrow": {
+        "origin": {
+          "x": 456,
+          "y": 334
+        },
+        "target": {
+          "x": 367,
+          "y": 333
+        },
+        "distanceFromText": 0.0,
+        "length": 89.00561780022652,
+        "alignment": 0.9981282949447632
+      }
+    },
+    {
+      "name": "Figura 1",
+      "confidence": 0.9897902949775131,
+      "detectionType": "arrow_not_found",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 236,
+        "y1": 8,
+        "x2": 289,
+        "y2": 28
+      },
+      "targetPoint": null,
+      "normalizedTargetPoint": null
+    }
+  ]
+}
