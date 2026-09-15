@@ -216,3 +216,5 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+!frontend_anato360/src/lib/
+!frontend_anato360/src/lib/**
