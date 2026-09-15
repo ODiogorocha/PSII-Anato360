@@ -1,0 +1,10 @@
+{
+  "description": "Provides an easy-to-use platform with login, scoring system, and light/dark modes in Spanish or Portuguese to enhance user engagement and accessibility.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
