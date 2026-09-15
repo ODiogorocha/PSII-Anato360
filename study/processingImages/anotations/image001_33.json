@@ -1,0 +1,363 @@
+{
+  "method": "arrows",
+  "annotations": [
+    {
+      "name": "Figura 33",
+      "confidence": 0.9900934731604955,
+      "detectionType": "arrow_not_found",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 152,
+        "y1": 16,
+        "x2": 220,
+        "y2": 37
+      },
+      "targetPoint": null,
+      "normalizedTargetPoint": null
+    },
+    {
+      "name": "pulmio",
+      "confidence": 0.7279438370802096,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 142,
+        "y1": 66,
+        "x2": 180,
+        "y2": 80
+      },
+      "targetPoint": {
+        "x": 138,
+        "y": 82
+      },
+      "normalizedTargetPoint": {
+        "x": 0.350253807106599,
+        "y": 0.27986348122866894
+      },
+      "arrow": {
+        "origin": {
+          "x": 146,
+          "y": 74
+        },
+        "target": {
+          "x": 138,
+          "y": 82
+        },
+        "distanceFromText": 0.0,
+        "length": 11.313708498984761,
+        "alignment": 0.7525767087936401
+      }
+    },
+    {
+      "name": "baso",
+      "confidence": 0.5041676759719849,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 208,
+        "y1": 71,
+        "x2": 239,
+        "y2": 91
+      },
+      "targetPoint": {
+        "x": 272,
+        "y": 101
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6903553299492385,
+        "y": 0.3447098976109215
+      },
+      "arrow": {
+        "origin": {
+          "x": 238,
+          "y": 99
+        },
+        "target": {
+          "x": 272,
+          "y": 101
+        },
+        "distanceFromText": 8.0,
+        "length": 34.058772731852805,
+        "alignment": 0.6592335104942322
+      }
+    },
+    {
+      "name": "oxório",
+      "confidence": 0.5977109070790911,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 276,
+        "y1": 73,
+        "x2": 309,
+        "y2": 89
+      },
+      "targetPoint": {
+        "x": 276,
+        "y": 100
+      },
+      "normalizedTargetPoint": {
+        "x": 0.700507614213198,
+        "y": 0.3412969283276451
+      },
+      "arrow": {
+        "origin": {
+          "x": 280,
+          "y": 85
+        },
+        "target": {
+          "x": 276,
+          "y": 100
+        },
+        "distanceFromText": 0.0,
+        "length": 15.524174696260024,
+        "alignment": 0.5499905943870544
+      }
+    },
+    {
+      "name": "Bmo",
+      "confidence": 0.49494069606095376,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 25,
+        "y1": 169,
+        "x2": 48,
+        "y2": 181
+      },
+      "targetPoint": {
+        "x": 62,
+        "y": 175
+      },
+      "normalizedTargetPoint": {
+        "x": 0.15736040609137056,
+        "y": 0.5972696245733788
+      },
+      "arrow": {
+        "origin": {
+          "x": 46,
+          "y": 173
+        },
+        "target": {
+          "x": 62,
+          "y": 175
+        },
+        "distanceFromText": 0.0,
+        "length": 16.1245154965971,
+        "alignment": 0.9486832618713379
+      }
+    },
+    {
+      "name": "inbssbno",
+      "confidence": 0.5704544759656167,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 230,
+        "y1": 213,
+        "x2": 272,
+        "y2": 228
+      },
+      "targetPoint": {
+        "x": 209,
+        "y": 214
+      },
+      "normalizedTargetPoint": {
+        "x": 0.5304568527918782,
+        "y": 0.7303754266211604
+      },
+      "arrow": {
+        "origin": {
+          "x": 225,
+          "y": 210
+        },
+        "target": {
+          "x": 209,
+          "y": 214
+        },
+        "distanceFromText": 5.830951894845301,
+        "length": 16.492422502470642,
+        "alignment": 0.8184130191802979
+      }
+    },
+    {
+      "name": "foado",
+      "confidence": 0.9289901240648757,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 166,
+        "y1": 221,
+        "x2": 199,
+        "y2": 238
+      },
+      "targetPoint": {
+        "x": 182,
+        "y": 212
+      },
+      "normalizedTargetPoint": {
+        "x": 0.4619289340101523,
+        "y": 0.7235494880546075
+      },
+      "arrow": {
+        "origin": {
+          "x": 182,
+          "y": 222
+        },
+        "target": {
+          "x": 182,
+          "y": 212
+        },
+        "distanceFromText": 0.0,
+        "length": 10.0,
+        "alignment": 1.0
+      }
+    },
+    {
+      "name": "dclondo",
+      "confidence": 0.8309985820443053,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 231,
+        "y1": 224,
+        "x2": 272,
+        "y2": 241
+      },
+      "targetPoint": {
+        "x": 245,
+        "y": 209
+      },
+      "normalizedTargetPoint": {
+        "x": 0.6218274111675127,
+        "y": 0.7133105802047781
+      },
+      "arrow": {
+        "origin": {
+          "x": 247,
+          "y": 223
+        },
+        "target": {
+          "x": 245,
+          "y": 209
+        },
+        "distanceFromText": 1.0,
+        "length": 14.142135623730951,
+        "alignment": 0.9340518116950989
+      }
+    },
+    {
+      "name": "sstimaoo",
+      "confidence": 0.3567330369110787,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 187,
+        "y1": 233,
+        "x2": 237,
+        "y2": 251
+      },
+      "targetPoint": {
+        "x": 208,
+        "y": 213
+      },
+      "normalizedTargetPoint": {
+        "x": 0.5279187817258884,
+        "y": 0.726962457337884
+      },
+      "arrow": {
+        "origin": {
+          "x": 209,
+          "y": 240
+        },
+        "target": {
+          "x": 208,
+          "y": 213
+        },
+        "distanceFromText": 0.0,
+        "length": 27.018512172212592,
+        "alignment": 0.5851156711578369
+      }
+    },
+    {
+      "name": "bexioa",
+      "confidence": 0.6152756405504735,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 283,
+        "y1": 254,
+        "x2": 319,
+        "y2": 271
+      },
+      "targetPoint": {
+        "x": 287,
+        "y": 236
+      },
+      "normalizedTargetPoint": {
+        "x": 0.7284263959390863,
+        "y": 0.8054607508532423
+      },
+      "arrow": {
+        "origin": {
+          "x": 296,
+          "y": 257
+        },
+        "target": {
+          "x": 287,
+          "y": 236
+        },
+        "distanceFromText": 0.0,
+        "length": 22.847319317591726,
+        "alignment": 0.9284766912460327
+      }
+    },
+    {
+      "name": "nm",
+      "confidence": 0.6770654531705613,
+      "detectionType": "arrow_not_found",
+      "requiresValidation": true,
+      "textBox": {
+        "x1": 228,
+        "y1": 50,
+        "x2": 248,
+        "y2": 63
+      },
+      "targetPoint": null,
+      "normalizedTargetPoint": null
+    },
+    {
+      "name": "rb",
+      "confidence": 0.697990747442903,
+      "detectionType": "arrow",
+      "requiresValidation": false,
+      "textBox": {
+        "x1": 324,
+        "y1": 98,
+        "x2": 347,
+        "y2": 111
+      },
+      "targetPoint": {
+        "x": 333,
+        "y": 116
+      },
+      "normalizedTargetPoint": {
+        "x": 0.8451776649746193,
+        "y": 0.39590443686006827
+      },
+      "arrow": {
+        "origin": {
+          "x": 335,
+          "y": 107
+        },
+        "target": {
+          "x": 333,
+          "y": 116
+        },
+        "distanceFromText": 0.0,
+        "length": 9.219544457292887,
+        "alignment": 0.994691789150238
+      }
+    }
+  ]
+}
