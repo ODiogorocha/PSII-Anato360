@@ -7,6 +7,8 @@ import Dashboard from './components/Dashboard';
 import QuizPage from './components/QuizPage';
 import ProgressPage from './components/ProgressPage';
 import AdminPage from './components/AdminPage';
+import SidebarChat from './components/SidebarChat';
+import UploadPDFPage from './components/UploadPDFPage';
 
 const ADMIN_KEYWORDS = ['prof', 'admin', 'teacher', 'docente', 'profesor'];
 
@@ -24,6 +26,8 @@ export default function App() {
   const [quizSystem, setQuizSystem] = useState<AnatomySystem>('all');
   const [customQuestions, setCustomQuestions] = useState<Question[]>([]);
 
+
+  
   useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -131,7 +135,11 @@ export default function App() {
             </p>
           </div>
         )}
+        {view === 'upload-pdf' as View && (
+          <UploadPDFPage lang={lang} />
+        )}
       </main>
+      <SidebarChat />
     </div>
   );
 }
