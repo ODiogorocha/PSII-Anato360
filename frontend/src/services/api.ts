@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // ✅ Instância do Axios para comunicação com o backend Django
 export const api = axios.create({
-  baseURL: 'http://localhost:8000/api/', // ajuste conforme sua rota real
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/',
 });
 
 // ✅ Interface para tipagem das perguntas
@@ -17,6 +17,11 @@ export interface Pergunta {
   opcoes: string[];
   pontos_recall: number;
   pontos_multipla_escolha: number;
+}
+
+export interface Frame {
+  numero_frame: number;
+  imagem: string;
 }
 
 // ✅ Interface para tipagem das peças anatômicas

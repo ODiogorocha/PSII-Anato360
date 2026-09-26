@@ -1,4 +1,5 @@
-import React, { Suspense, Component, ReactNode } from 'react';
+import React, { Suspense, Component } from 'react';
+import type { ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Center } from '@react-three/drei';
 import { RotateCw, AlertTriangle } from 'lucide-react';
@@ -47,8 +48,7 @@ interface ModelProps {
 }
 
 function Model({ url }: ModelProps) {
-  // Garante a URL absoluta para a API do Django
-  const fullUrl = url.startsWith('http') ? url : `http://127.0.0.1:8000${url}`;
+  const fullUrl = url;
   const { scene } = useGLTF(fullUrl);
   return <primitive object={scene} />;
 }

@@ -1,0 +1,58 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        VITE_API_BASE_URL: /api/
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      DATABASE_PATH: /app/data/db.sqlite3
+      DJANGO_ALLOWED_HOSTS: "${DJANGO_ALLOWED_HOSTS:-*}"
+      DJANGO_DEBUG: "${DJANGO_DEBUG:-false}"
+      DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY:-change-this-key-outside-development}"
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_EMBEDDING_MODEL: "${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}"
+      OLLAMA_LLM_MODEL: "${OLLAMA_LLM_MODEL:-llama3.1}"
+    volumes:
+      - django-data:/app/data
+      - media-data:/app/media
+    depends_on:
+      ollama:
+        condition: service_healthy
+      ollama-models:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  ollama-models:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_EMBEDDING_MODEL: "${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}"
+      OLLAMA_LLM_MODEL: "${OLLAMA_LLM_MODEL:-llama3.1}"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        ollama pull "$${OLLAMA_EMBEDDING_MODEL}" &&
+        ollama pull "$${OLLAMA_LLM_MODEL}"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  django-data:
+  media-data:
+  ollama-data:

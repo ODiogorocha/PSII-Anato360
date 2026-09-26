@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 
 
@@ -6,14 +7,14 @@ class OllamaConfig:
     """Configuração de conexão e modelos do Ollama."""
 
     # Endereço do servidor Ollama (local por padrão)
-    host: str = "http://localhost:11434"
+    host: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 
     # Modelo usado para gerar embeddings (precisa estar puxado: `ollama pull nomic-embed-text`)
-    embedding_model: str = "nomic-embed-text"
+    embedding_model: str = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
 
     # Modelo usado como decoder/LLM para responder perguntas e gerar dicas
     # (ex: "llama3.1", "mistral", "gemma2" — precisa estar puxado no Ollama)
-    llm_model: str = "llama3.1"
+    llm_model: str = os.getenv("OLLAMA_LLM_MODEL", "llama3.1")
 
     # Timeout (segundos) para as chamadas HTTP ao Ollama
     request_timeout: int = 120
