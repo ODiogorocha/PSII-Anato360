@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 import re
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
@@ -316,6 +317,10 @@ saturation (0.8 a 1.2), sharpness (0 a 1.0) e denoise (0 a 10).
                 image = self._reconstructRegions(image)
                 if self.imageEnhancer is not None or self.ollamaClient is not None:
                     image = self._enhanceImage(image)
+                else:
+                    image.metadata["enhancement"] = {"status": "disabled"}
+            else:
+                image.metadata["enhancement"] = {"status": "skipped", "reason": "no_text_detected"}
             image = self._buildImage(image)
         except Exception as error:  # O item não é perdido se uma etapa falhar.
             image.is_processed = False
@@ -654,14 +659,14 @@ saturation (0.8 a 1.2), sharpness (0 a 1.0) e denoise (0 a 10).
                     return image
                 image.data = self._applyEnhancementParameters(image.data, parameters)
                 image.metadata["enhancement"] = {
+                    "status": "applied",
                     "engine": "ollama+opencv",
                     "model": self.ollamaModel,
                     "parameters": parameters,
                 }
                 return image
             else:
-                printError(verbose=self.verbose, text="O cliente de aprimoramento não possui uma API suportada.")
-                return image
+                raise ValueError("O cliente de aprimoramento não possui uma API suportada.")
 
             enhanced = self._decodeEnhancedImage(result)
             if enhanced is None:
@@ -669,7 +674,7 @@ saturation (0.8 a 1.2), sharpness (0 a 1.0) e denoise (0 a 10).
             if enhanced.shape[:2] != image.data.shape[:2]:
                 raise ValueError("O adapter alterou as dimensões da imagem.")
             image.data = enhanced
-            image.metadata["enhancement"] = {"engine": "custom-adapter"}
+            image.metadata["enhancement"] = {"status": "applied", "engine": "custom-adapter"}
         except Exception as error:
             # Aprimoramento é opcional: a reconstrução válida continua disponível.
             image.metadata["enhancement"] = {"status": "skipped", "error": str(error)}
@@ -681,7 +686,11 @@ saturation (0.8 a 1.2), sharpness (0 a 1.0) e denoise (0 a 10).
         if not model:
             raise ValueError("Informe ollama_model ao usar um cliente Ollama oficial.")
 
-        success, encoded = cv2.imencode(".png", pixels)
+        # A visão escolhe filtros globais: uma prévia reduz o uso de memória do modelo.
+        height, width = pixels.shape[:2]
+        scale = min(1.0, 1280.0 / max(height, width))
+        preview = cv2.resize(pixels, (max(1, round(width * scale)), max(1, round(height * scale)))) if scale < 1 else pixels
+        success, encoded = cv2.imencode(".png", preview)
         if not success:
             raise ValueError("Não foi possível codificar a imagem para o Ollama.")
 
@@ -718,6 +727,8 @@ saturation (0.8 a 1.2), sharpness (0 a 1.0) e denoise (0 a 10).
             try:
                 value = float(parameters.get(name, default))
             except (TypeError, ValueError):
+                value = default
+            if not math.isfinite(value):
                 value = default
             sanitized[name] = min(maximum, max(minimum, value))
         return sanitized

@@ -1,5 +1,21 @@
 # Anato360 - Sistema Interativo para o Estudo da Anatomia Veterinária
 
+## Executar o sistema
+
+O frontend em `frontend/` segue o design Figma enviado. API Django, MySQL,
+processamento de imagens, fila e Ollama rodam em containers separados.
+
+Configure as credenciais em `.env` usando `.env.example` como referência e execute:
+
+```bash
+docker compose up -d --build
+```
+
+Acesse <http://localhost> (porta 80). O mesmo frontend atende os hosts
+`127.0.0.1`, `200.18.75.25` e `srv-01.tail881f91.ts.net` configurados no ambiente.
+Consulte [DOCKER.md](DOCKER.md) para arquitetura, modelos, banco, API e testes.
+
+
 ## Desenvolvedores
 
 <p align="center">

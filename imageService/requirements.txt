@@ -9,5 +9,5 @@ Pillow>=10,<13
 # Classificação zero-shot de imagens anatômicas
 clip @ git+https://github.com/openai/CLIP.git@d05afc436d78f1c48dc0dbf8e5980a9d471f35f6
 
-# Cliente opcional usado quando ollamaClient/ollama_model são informados
-# ollama>=0.4,<1
+# Cliente HTTP compartilhado com IA_module para o Ollama
+requests>=2.32,<3

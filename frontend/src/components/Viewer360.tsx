@@ -1,89 +1,166 @@
-import React, { useState } from 'react';
-import type { Pergunta } from '../services/api';
-import { RotateCw } from 'lucide-react';
+import { useRef, useState, useCallback, useEffect } from 'react';
+import type { Language } from '../lib/types';
 
-interface Viewer360Props {
-  frames: { numero_frame: number; imagem: string }[];
-  perguntaAtual?: Pergunta;
+interface Props {
+  imageUrl: string;
+  imageAlt: string;
+  marker: { x: number; y: number };
+  lang: Language;
 }
 
-export const Viewer360: React.FC<Viewer360Props> = ({ frames, perguntaAtual }) => {
-  const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
+export default function Viewer360({ imageUrl, imageAlt, marker, lang }: Props) {
+  const [rotY, setRotY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const startX = useRef(0);
+  const startRotY = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [bounds, setBounds] = useState({ width: 4, height: 3 });
+  const [imageSize, setImageSize] = useState({ width: 4, height: 3 });
 
-  const totalFrames = frames.length;
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setBounds({ width: entry.contentRect.width, height: entry.contentRect.height });
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
-  const handlePointerDown = (e: React.PointerEvent) => {
+  const startDrag = (clientX: number) => {
     setIsDragging(true);
-    setStartX(e.clientX);
+    setHasInteracted(true);
+    startX.current = clientX;
+    startRotY.current = rotY;
   };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging || totalFrames === 0) return;
-    const deltaX = e.clientX - startX;
+  const moveDrag = useCallback(
+    (clientX: number) => {
+      if (!isDragging) return;
+      const delta = (clientX - startX.current) * 0.6;
+      setRotY(() => {
+        const next = startRotY.current + delta;
+        return Math.max(-60, Math.min(60, next));
+      });
+    },
+    [isDragging],
+  );
 
-    if (Math.abs(deltaX) > 12) {
-      const step = deltaX > 0 ? 1 : -1;
-      setCurrentFrameIndex((prev) => (prev + step + totalFrames) % totalFrames);
-      setStartX(e.clientX);
-    }
-  };
+  const endDrag = () => setIsDragging(false);
 
-  const handlePointerUp = () => setIsDragging(false);
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => moveDrag(e.clientX);
+    const onMouseUp = () => endDrag();
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [moveDrag]);
 
-  const isArrowVisible = perguntaAtual && perguntaAtual.frame_alvo === currentFrameIndex;
+  const displayAngle = Math.round(rotY);
+  // Keep pixel coordinates aligned with the full image, including portrait uploads.
+  const fit = Math.min(bounds.width / imageSize.width, bounds.height / imageSize.height);
 
-  if (totalFrames === 0) {
-    return (
-      <div className="w-[450px] h-[450px] bg-slate-200 rounded-2xl flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-slate-300">
-        <RotateCw className="w-10 h-10 animate-spin text-slate-400 mb-2" />
-        <p className="font-medium">Nenhum frame cadastrado para esta peça.</p>
-      </div>
-    );
-  }
-
-  const imagemAtual = frames[currentFrameIndex]?.imagem;
+  // Simulate depth compression at extreme angles
+  const scaleX = 1 - Math.abs(rotY) * 0.003;
 
   return (
-    <div className="flex flex-col items-center select-none">
+    <div
+      ref={containerRef}
+      className="relative select-none rounded-2xl overflow-hidden"
+      style={{
+        cursor: isDragging ? 'grabbing' : 'grab',
+        background: 'var(--muted)',
+        aspectRatio: '4/3',
+        touchAction: 'pan-y',
+      }}
+      onMouseDown={e => startDrag(e.clientX)}
+      onTouchStart={e => startDrag(e.touches[0].clientX)}
+      onTouchMove={e => moveDrag(e.touches[0].clientX)}
+      onTouchEnd={endDrag}
+      onTouchCancel={endDrag}
+    >
+      {/* Image with 3D rotation */}
       <div
-        className="relative w-[450px] h-[450px] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 cursor-grab active:cursor-grabbing flex items-center justify-center"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
+        className="w-full h-full flex items-center justify-center"
+        style={{
+          perspective: '900px',
+          perspectiveOrigin: '50% 50%',
+        }}
       >
+        <div className="relative shrink-0" style={{
+          width: imageSize.width * fit, height: imageSize.height * fit,
+          transform: `rotateY(${rotY}deg) scaleX(${scaleX})`,
+          transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        }}>
         <img
-          src={imagemAtual}
-          alt={`Frame ${currentFrameIndex}`}
-          className="w-full h-full object-contain pointer-events-none"
+          src={imageUrl}
+          alt={imageAlt}
+          draggable={false}
+          className="w-full h-full object-contain"
+          onLoad={event => setImageSize({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
         />
 
-        {isArrowVisible && (
+      {/* Structure marker */}
+      <div
+        className="absolute pointer-events-none"
+        data-testid="structure-marker"
+        style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
+      >
+        <div className="relative -translate-x-1/2 -translate-y-1/2">
+          {/* Pulsing ring */}
           <div
-            className="absolute z-20 flex flex-col items-center pointer-events-none animate-bounce"
+            className="absolute inset-0 rounded-full animate-ping"
             style={{
-              left: `${perguntaAtual.posicao_x}%`,
-              top: `${perguntaAtual.posicao_y}%`,
-              transform: 'translate(-50%, -100%)',
+              width: '28px',
+              height: '28px',
+              background: 'var(--accent)',
+              opacity: 0.35,
+              transform: 'translate(-25%, -25%)',
             }}
-          >
-            <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded shadow">
-              Identifique
-            </span>
-            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-red-600"></div>
-          </div>
-        )}
-
-        <div className="absolute bottom-3 right-3 bg-slate-900/60 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm">
-          {currentFrameIndex + 1} / {totalFrames} (360°)
+          />
+          {/* Dot */}
+          <div
+            className="w-5 h-5 rounded-full border-2 border-white shadow-lg"
+            style={{ background: 'var(--accent)' }}
+          />
+        </div>
+      </div>
         </div>
       </div>
 
-      <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-        <RotateCw className="w-3.5 h-3.5" /> Arraste para girar a peça anatômica
-      </p>
+      {/* Bottom HUD */}
+      <div className="absolute bottom-3 left-0 right-0 flex items-center justify-between px-4 pointer-events-none">
+        {/* Rotation indicator */}
+        <div
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono-data"
+          style={{ background: 'rgba(0,0,0,0.55)', color: '#fff' }}
+        >
+          <span>↔</span>
+          <span>{displayAngle}°</span>
+        </div>
+
+        {/* Hint */}
+        {!hasInteracted && (
+          <div
+            className="px-3 py-1 rounded-full text-xs"
+            style={{ background: 'rgba(0,0,0,0.55)', color: '#fff' }}
+          >
+            {lang === 'pt' ? 'Arraste para girar' : 'Arrastre para girar'}
+          </div>
+        )}
+
+        {/* 360° badge */}
+        <div
+          className="px-2.5 py-1 rounded-full text-xs font-bold"
+          style={{ background: 'rgba(0,0,0,0.55)', color: '#fff' }}
+        >
+          2D
+        </div>
+      </div>
     </div>
   );
-};
+}

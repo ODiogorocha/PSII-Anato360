@@ -182,3 +182,56 @@ pixels. A serialização também fornece `normalizedPosition` no intervalo 0–1
 ela não representa o ponto anatômico indicado por uma eventual linha-guia.
 
 
+
+## API HTTP e Docker
+
+O serviço interno `image-processor` escuta na porta 8001 da rede Docker. O backend/worker
+envia `POST /process` com multipart `file`, `image_id` e, opcionalmente,
+`use_ollama=true|false`. O frontend consulta somente o backend via proxy na porta 80.
+A persistência de arquivos e metadados fica no backend, que salva também os rótulos
+na base MySQL.
+
+O processamento mantém a sequência existente: validação anatômica pelo CLIP, OCR pelo
+EasyOCR, máscara de caracteres, reconstrução Telea/OpenCV e aprimoramento opcional.
+O aprimoramento ocorre após a reconstrução de texto. Quando nenhum texto é detectado,
+a imagem original é preservada e `metadata.enhancement.reason` informa `no_text_detected`.
+O mesmo servidor Ollama usado pelo chat recebe uma prévia da imagem reconstruída e
+retorna parâmetros JSON de contraste, brilho, saturação, nitidez e redução de ruído.
+Os parâmetros são limitados pelo serviço e aplicados na imagem completa pelo OpenCV.
+O Ollama não gera pixels nem reconstitui estruturas anatômicas por si só.
+
+A resposta contém `id`, `isValid`, `isProcessed`, `width`, `height`, `rotules`,
+`metadata` e `processed_image_base64` (PNG). `metadata.enhancement.status` pode ser
+`applied`, `disabled` ou `skipped`. Se o aprimoramento falhar, o resultado dos scripts
+continua disponível e `metadata.enhancement.error` registra o motivo.
+
+| Variável | Padrão | Uso |
+|---|---|---|
+| `OLLAMA_HOST` | `http://localhost:11434` | No Docker: `http://ollama:11434` |
+| `OLLAMA_VISION_MODEL` | `llama3.2-vision:11b` | Modelo com entrada de imagem |
+| `OLLAMA_REQUEST_TIMEOUT` | `180` | Limite da resposta do Ollama em segundos |
+| `IMAGE_USE_OLLAMA` | `false` | Padrão quando o formulário não envia `use_ollama`; melhoria visual opcional |
+| `IMAGE_VALIDATE_ANATOMY` | `true` | Classificação CLIP; desativar mantém a validação estrutural |
+| `IMAGE_OCR_GPU` | `false` | O container padrão instala PyTorch CPU |
+| `IMAGE_MAX_BYTES` | `20971520` | Limite de arquivo: 20 MiB |
+| `IMAGE_MAX_PIXELS` | `16000000` | Limite de resolução antes de decodificar no OpenCV |
+| `IMAGE_LOCK_TIMEOUT` | `5` | Espera pela instância de processamento, em segundos |
+
+A API retorna 413 para arquivos/resoluções excessivas, 415 para formatos não aceitos,
+422 para imagens inválidas ou não anatômicas e 503 para falhas temporárias ou ocupação.
+O worker pode repetir erros 503. A execução HTTP usa uma instância com exclusão mútua;
+as filas e arquivos temporários são limpos ao término de cada requisição.
+`GET /health` informa a disponibilidade da API, sem forçar o carregamento dos modelos.
+
+O Dockerfile instala PyTorch/torchvision CPU para funcionar sem GPU. CLIP e EasyOCR
+baixam pesos na primeira execução; os volumes do Compose conservam os caches em
+`/root/.cache` e `/root/.EasyOCR`. O modelo visual do Ollama é preparado separadamente
+por `ollama-models` e requer memória compatível com o modelo escolhido.
+
+Para executar também os testes HTTP, instale `fastapi`, `python-multipart` e `httpx`
+no ambiente de testes. As suítes usam OCR/validação/HTTP controlados, sem baixar pesos:
+
+```bash
+python -m unittest discover -s imageService/tests -v
+python -m unittest discover -s IA_module/tests -v
+```

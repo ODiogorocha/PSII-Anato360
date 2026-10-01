@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -7,17 +7,24 @@ class OllamaConfig:
     """Configuração de conexão e modelos do Ollama."""
 
     # Endereço do servidor Ollama (local por padrão)
-    host: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    host: str = field(default_factory=lambda: os.getenv("OLLAMA_HOST", "http://localhost:11434"))
 
     # Modelo usado para gerar embeddings (precisa estar puxado: `ollama pull nomic-embed-text`)
-    embedding_model: str = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
+    embedding_model: str = field(default_factory=lambda: os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text"))
 
     # Modelo usado como decoder/LLM para responder perguntas e gerar dicas
     # (ex: "llama3.1", "mistral", "gemma2" — precisa estar puxado no Ollama)
-    llm_model: str = os.getenv("OLLAMA_LLM_MODEL", "llama3.1")
+    llm_model: str = field(default_factory=lambda: os.getenv("OLLAMA_CHAT_MODEL") or os.getenv("OLLAMA_LLM_MODEL", "llama3.1:8b"))
 
     # Timeout (segundos) para as chamadas HTTP ao Ollama
-    request_timeout: int = 120
+    request_timeout: float = field(default_factory=lambda: float(os.getenv("OLLAMA_REQUEST_TIMEOUT", "180")))
+
+    def __post_init__(self):
+        self.host = self.host.rstrip("/")
+        if not self.host.startswith(("http://", "https://")):
+            raise ValueError("OLLAMA_HOST deve ser uma URL HTTP, por exemplo http://ollama:11434.")
+        if self.request_timeout <= 0:
+            raise ValueError("OLLAMA_REQUEST_TIMEOUT deve ser maior que zero.")
 
 
 @dataclass
