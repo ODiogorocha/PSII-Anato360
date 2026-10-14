@@ -22,6 +22,7 @@ export default function Navbar({
     { id: 'dashboard', label: tr(lang, 'nav_dashboard') },
     { id: 'quiz', label: tr(lang, 'nav_quiz') },
     { id: 'progress', label: tr(lang, 'nav_progress') },
+    { id: 'upload-pdf' as View, label: lang === 'pt' ? 'Gerir PDFs (IA)' : 'Gestionar PDFs (IA)' },
     { id: 'admin', label: tr(lang, 'nav_admin'), adminOnly: true },
   ];
 
