@@ -16,6 +16,50 @@ from .models import ImageAnnotation, UploadedImage, UserNotification
 logger = logging.getLogger(__name__)
 
 
+def _request_processed_image(image):
+    primary = os.getenv('IMAGE_PROCESSOR_URL', 'http://image-processor:8001').rstrip('/')
+    fallback = os.getenv('IMAGE_PROCESSOR_FALLBACK_URL', '').rstrip('/')
+    endpoints = list(dict.fromkeys(url for url in (primary, fallback) if url))
+    for index, endpoint in enumerate(endpoints):
+        read_timeout = float(os.getenv(
+            'IMAGE_PROCESSOR_PRIMARY_TIMEOUT' if index < len(endpoints) - 1 else 'IMAGE_PROCESSOR_TIMEOUT',
+            '120' if index < len(endpoints) - 1 else '1800',
+        ))
+        try:
+            # Reopen the original on each attempt: the previous upload consumed it.
+            with image.original_file.open('rb') as source:
+                response = requests.post(
+                    f'{endpoint}/process',
+                    files={'file': (os.path.basename(image.original_file.name), source, 'application/octet-stream')},
+                    data={'image_id': str(image.pk), 'use_ollama': str(image.use_ollama).lower()},
+                    timeout=(3, read_timeout),
+                )
+            response.raise_for_status()
+            result = response.json()
+            encoded_image = result.get('processed_image_base64') if isinstance(result, dict) else None
+            if not encoded_image or result.get('isProcessed') is not True:
+                raise ValueError('O serviço não retornou uma imagem processada válida.')
+            try:
+                processed_bytes = base64.b64decode(encoded_image, validate=True)
+            except (binascii.Error, ValueError, TypeError) as error:
+                raise ValueError('O serviço retornou os dados da imagem em formato inválido.') from error
+            with Image.open(io.BytesIO(processed_bytes)) as processed:
+                width, height = processed.size
+                if processed.format != 'PNG':
+                    raise ValueError('O serviço de processamento deve retornar uma imagem PNG.')
+                processed.verify()
+            return result, processed_bytes, width, height, 'primary' if index == 0 else 'fallback'
+        except (requests.RequestException, ValueError, OSError) as error:
+            if isinstance(error, requests.HTTPError) and error.response is not None:
+                code = error.response.status_code
+                if code < 500 and code not in {404, 408, 429}:
+                    raise  # Invalid/unauthorized input must not be retried elsewhere.
+            if index == len(endpoints) - 1:
+                raise
+            logger.warning('Processador preferencial indisponível; tentando o fallback: %s', error)
+    raise ValueError('Nenhum processador de imagens configurado.')
+
+
 def _finish_with_error(image_id, message):
     with transaction.atomic():
         image = UploadedImage.objects.select_for_update().filter(pk=image_id).first()
@@ -39,7 +83,7 @@ def process_uploaded_image(self, image_id):
     except UploadedImage.DoesNotExist:
         return
 
-    if image.status == UploadedImage.Status.READY:
+    if image.processing_mode == UploadedImage.ProcessingMode.MANUAL or image.status == UploadedImage.Status.READY:
         return {'image_id': image.pk, 'status': image.status}
 
     image.status = UploadedImage.Status.PROCESSING
@@ -48,27 +92,7 @@ def process_uploaded_image(self, image_id):
 
     saved_processed_file = None
     try:
-        with image.original_file.open('rb') as source:
-            response = requests.post(
-                f"{os.getenv('IMAGE_PROCESSOR_URL', 'http://image-processor:8001')}/process",
-                files={'file': (os.path.basename(image.original_file.name), source, 'application/octet-stream')},
-                data={'image_id': str(image.pk), 'use_ollama': str(image.use_ollama).lower()},
-                timeout=(20, 1800),
-            )
-        response.raise_for_status()
-        result = response.json()
-        encoded_image = result.get('processed_image_base64')
-        if result.get('isProcessed') is not True or not encoded_image:
-            raise ValueError(result.get('error') or 'O serviço não retornou uma imagem processada.')
-        try:
-            processed_bytes = base64.b64decode(encoded_image, validate=True)
-        except (binascii.Error, ValueError) as error:
-            raise ValueError('O serviço retornou os dados da imagem em formato inválido.') from error
-        with Image.open(io.BytesIO(processed_bytes)) as processed:
-            width, height = processed.size
-            if processed.format != 'PNG':
-                raise ValueError('O serviço de processamento deve retornar uma imagem PNG.')
-            processed.verify()
+        result, processed_bytes, width, height, processor_backend = _request_processed_image(image)
 
         with transaction.atomic():
             image = UploadedImage.objects.select_for_update().select_related('owner').get(pk=image_id)
@@ -80,6 +104,7 @@ def process_uploaded_image(self, image_id):
                 'width': width,
                 'height': height,
                 'processor_image_id': result.get('id'),
+                'processor_backend': processor_backend,
             }
             image.status = UploadedImage.Status.READY
             image.error_message = ''
@@ -117,7 +142,7 @@ def process_uploaded_image(self, image_id):
         # A user can delete an upload while the independent processor is working.
         return
     except requests.HTTPError as error:
-        if error.response is not None and error.response.status_code < 500:
+        if error.response is not None and error.response.status_code < 500 and error.response.status_code not in {408, 429}:
             try:
                 detail = error.response.json().get('detail', error.response.text)
             except ValueError:

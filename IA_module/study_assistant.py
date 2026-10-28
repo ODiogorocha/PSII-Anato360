@@ -1,15 +1,19 @@
 from __future__ import annotations
 
+import os
 import uuid
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import List, Optional, Union
 
 from .chunker import chunk_text
-from .config import ChunkingConfig, OllamaConfig, RetrievalConfig
+from .config import ChunkingConfig, OllamaConfig, OpenRouterConfig, RetrievalConfig
 from .ollama_client import OllamaClient
+from .openrouter_client import OpenRouterClient
 from .pdf_loader import extract_text_from_pdf
 from .vector_store import VectorStore
+
+AI_PROVIDER = os.getenv("AI_PROVIDER", "ollama").strip().lower()
 
 _SYSTEM_PROMPT_CHAT = (
     "Você é o assistente de estudos de anatomia humana e veterinária do Anato360. "
@@ -37,7 +41,7 @@ _SYSTEM_PROMPT_TIPS = (
 
 
 class StudyAssistant:
-    """Módulo de PLN para estudo baseado em PDF, usando Ollama como decoder.
+    """Chat e estudo baseado em PDF com Ollama ou OpenRouter.
 
     Responsável por: ingerir PDFs, indexá-los (chunking + embeddings) e
     responder perguntas / gerar dicas de estudo com base no conteúdo indexado.
@@ -48,8 +52,19 @@ class StudyAssistant:
         ollama_config: Optional[OllamaConfig] = None,
         chunking_config: Optional[ChunkingConfig] = None,
         retrieval_config: Optional[RetrievalConfig] = None,
+        *,
+        provider: str | None = None,
+        openrouter_config: Optional[OpenRouterConfig] = None,
     ):
-        self.ollama = OllamaClient(ollama_config)
+        self.provider = AI_PROVIDER if provider is None else provider
+        if self.provider == "ollama":
+            self.client = OllamaClient(ollama_config)
+        elif self.provider == "openrouter":
+            self.client = OpenRouterClient(openrouter_config)
+        else:
+            raise ValueError('AI_PROVIDER deve ser "ollama" ou "openrouter".')
+        # Alias legado para integrações que acessavam assistant.ollama.
+        self.ollama = self.client
         self.chunking_config = chunking_config or ChunkingConfig()
         self.retrieval_config = retrieval_config or RetrievalConfig()
         self.store = VectorStore()
@@ -71,7 +86,7 @@ class StudyAssistant:
         if not chunks:
             raise ValueError(f"Não foi possível gerar chunks a partir do PDF: {path}")
 
-        embeddings = self.ollama.embed_batch(chunks)
+        embeddings = self.client.embed_batch(chunks)
         self.store.add_document(doc_id, chunks, embeddings)
         return doc_id
 
@@ -102,7 +117,11 @@ class StudyAssistant:
             )
         response_language = 'espanhol' if language == 'es' else 'português'
         system_prompt = f'{_SYSTEM_PROMPT_CHAT} Responda em {response_language}.'
-        return self.ollama.chat(system_prompt, prompt, history=history)
+        return self.client.chat(system_prompt, prompt, history=history)
+
+    def chat_status(self) -> dict:
+        """Consulta a disponibilidade do provedor selecionado."""
+        return self.client.chat_status()
 
     def ask(
         self,
@@ -123,12 +142,12 @@ class StudyAssistant:
             return self.chat(question, history=history)
 
         top_k = self._validate_top_k(top_k)
-        question_embedding = self.ollama.embed(question)
+        question_embedding = self.client.embed(question)
         relevant_chunks = self.store.search(question_embedding, top_k=top_k, doc_id=doc_id)
 
         context = self._build_context(relevant_chunks)
         user_prompt = f"CONTEXTO:\n{context}\n\nPERGUNTA:\n{question}"
-        return self.ollama.chat(_SYSTEM_PROMPT_QA, user_prompt, history=history)
+        return self.client.chat(_SYSTEM_PROMPT_QA, user_prompt, history=history)
 
     # ------------------------------------------------------------------
     # Dicas de estudo
@@ -151,7 +170,7 @@ class StudyAssistant:
         top_k = self._validate_top_k(top_k)
 
         if focus:
-            focus_embedding = self.ollama.embed(focus)
+            focus_embedding = self.client.embed(focus)
             relevant_chunks = self.store.search(focus_embedding, top_k=top_k, doc_id=doc_id)
             context = self._build_context(relevant_chunks)
             user_prompt = f"CONTEXTO:\n{context}\n\nFOCO SOLICITADO:\n{focus}"
@@ -160,7 +179,7 @@ class StudyAssistant:
             context = self.store.get_all_text(doc_id)[:24000]
             user_prompt = f"CONTEXTO (material completo):\n{context}"
 
-        return self.ollama.chat(_SYSTEM_PROMPT_TIPS, user_prompt)
+        return self.client.chat(_SYSTEM_PROMPT_TIPS, user_prompt)
 
     # ------------------------------------------------------------------
     # Helpers

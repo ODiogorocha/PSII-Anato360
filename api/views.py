@@ -38,7 +38,7 @@ from .serializers import (
 
 
 from IA_module.study_assistant import StudyAssistant
-from IA_module.ollama_client import OllamaClientError
+from IA_module.client import AIClientError
 
 study_assistant = StudyAssistant()
 logger = logging.getLogger(__name__)
@@ -166,6 +166,13 @@ class UploadedImageViewSet(viewsets.ModelViewSet):
         return queryset.filter(category=category) if category else queryset
 
     def perform_create(self, serializer):
+        if serializer.validated_data.get('processing_mode') == UploadedImage.ProcessingMode.MANUAL:
+            width, height = serializer.validated_data['original_file'].image.size
+            serializer.save(
+                owner=self.request.user, status=UploadedImage.Status.READY, use_ollama=False,
+                processing_metadata={'width': width, 'height': height},
+            )
+            return
         image = serializer.save(owner=self.request.user, status=UploadedImage.Status.QUEUED)
         transaction.on_commit(lambda: enqueue_image(image.pk))
 
@@ -212,6 +219,8 @@ class UploadedImageViewSet(viewsets.ModelViewSet):
         require_image_owner(request.user, image)
         with transaction.atomic():
             image = UploadedImage.objects.select_for_update().get(pk=image.pk)
+            if image.processing_mode == UploadedImage.ProcessingMode.MANUAL:
+                return Response({'detail': 'Esta imagem usa edição manual. Envie uma nova imagem para usar o processamento automático.'}, status=409)
             if image.status in {UploadedImage.Status.QUEUED, UploadedImage.Status.PROCESSING}:
                 return Response({'detail': 'A imagem já está na fila de processamento.'}, status=409)
             image.status = UploadedImage.Status.QUEUED
@@ -233,7 +242,7 @@ class UploadedImageViewSet(viewsets.ModelViewSet):
             random.Random(f'{image.pk}:{annotation.pk}').shuffle(choices)
             questions.append({
                 'id': annotation.pk,
-                'pergunta': 'Qual nome estava no rótulo removido desta posição?',
+                'pergunta': 'Qual estrutura está indicada nesta posição?',
                 'posicao': {'x': annotation.x, 'y': annotation.y},
                 'resposta_correta': annotation.text,
                 'opcoes': choices,
@@ -241,7 +250,7 @@ class UploadedImageViewSet(viewsets.ModelViewSet):
         return Response({
             'imagem_id': image.pk,
             'status': image.status,
-            'arquivo_processado': f'/api/imagens/{image.pk}/arquivo/processada/',
+            'arquivo_processado': f'/api/imagens/{image.pk}/arquivo/{"original" if image.processing_mode == UploadedImage.ProcessingMode.MANUAL else "processada"}/',
             'largura': image.processing_metadata.get('width'),
             'altura': image.processing_metadata.get('height'),
             'perguntas': questions,
@@ -251,6 +260,9 @@ class UploadedImageViewSet(viewsets.ModelViewSet):
     def arquivo(self, request, pk=None, kind=None):
         image = self.get_object()
         image_field = image.original_file if kind == 'original' else image.processed_file
+        # Keep older clients that request the study image at /processada/ working.
+        if kind == 'processada' and image.processing_mode == UploadedImage.ProcessingMode.MANUAL:
+            image_field = image.original_file
         if not image_field:
             return Response({'detail': 'Este arquivo ainda não está disponível.'}, status=404)
         try:
@@ -298,10 +310,10 @@ class AIQueryView(APIView):
                 question, history=history, context=context,
                 language=serializer.validated_data['idioma'],
             )
-        except (OllamaClientError, RuntimeError):
-            logger.exception('Ollama chat unavailable')
+        except (AIClientError, RuntimeError):
+            logger.exception('AI chat unavailable (provider=%s)', study_assistant.provider)
             return Response(
-                {'detail': 'O assistente está indisponível no momento. Verifique se o Ollama e o modelo estão prontos.'},
+                {'detail': 'O assistente está indisponível no momento. Verifique a configuração do provedor de IA e do modelo.'},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         with transaction.atomic():
@@ -316,7 +328,7 @@ class ChatStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(study_assistant.ollama.chat_status())
+        return Response(study_assistant.chat_status())
 
 
 class ChatHistoryView(APIView):
@@ -373,7 +385,7 @@ class QuizQuestionsView(APIView):
             ny = annotation.normalized_y if annotation.normalized_y is not None else annotation.y / height
             result.append({
                 'id': str(annotation.pk), 'image_id': image.pk, 'system': image.category,
-                'imageUrl': f'/api/imagens/{image.pk}/arquivo/processada/',
+                'imageUrl': f'/api/imagens/{image.pk}/arquivo/{"original" if image.processing_mode == UploadedImage.ProcessingMode.MANUAL else "processada"}/',
                 'imageAlt_pt': image.title or image.description or 'Peça anatômica',
                 'imageAlt_es': image.title_es or image.description_es or image.title or 'Pieza anatómica',
                 'marker': {'x': nx * 100, 'y': ny * 100},

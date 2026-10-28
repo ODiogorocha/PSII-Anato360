@@ -66,7 +66,7 @@ export default function QuizPage({ lang, system, onComplete, onBack }: Props) {
     setImageUrl('');
     if (!q) return;
     if (q.image_id) {
-      imageBlob(q.image_id, true).then(value => {
+      imageBlob(q.image_id, q.imageUrl.endsWith('/processada/')).then(value => {
         url = value;
         if (active) setImageUrl(value); else URL.revokeObjectURL(value);
       }).catch(reason => { if (active) setError(apiError(reason)); });

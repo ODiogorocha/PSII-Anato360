@@ -1,0 +1,89 @@
+# Complete server stack. Persistent data stays here; compute prefers Windows.
+# Load credentials with --env-file .env --env-file .env.server.
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: /api/
+    ports:
+      - "127.0.0.1:${APP_PORT:-80}:80"
+    environment:
+      PUBLIC_SCHEME: "${PUBLIC_SCHEME:-https}"
+      NGINX_ENVSUBST_FILTER: "^PUBLIC_SCHEME$$"
+    volumes:
+      - ./docker/server-nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend-gateway:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./docker/backend-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - media-data:/app/media:ro
+      - static-data:/app/staticfiles:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    extends:
+      file: compose.yaml
+      service: api
+    environment: &preferred-compute
+      # BACKEND_UPSTREAM remains the private Windows gateway URL, now compute-only.
+      OLLAMA_HOST: "${BACKEND_UPSTREAM:?Set BACKEND_UPSTREAM to the Windows Tailscale URL}/ollama"
+      OLLAMA_FALLBACK_HOST: http://ollama:11434
+      OLLAMA_PRIMARY_TIMEOUT: "${OLLAMA_PRIMARY_TIMEOUT:-60}"
+      IMAGE_PROCESSOR_URL: "${BACKEND_UPSTREAM:?Set BACKEND_UPSTREAM to the Windows Tailscale URL}/image-processor"
+      IMAGE_PROCESSOR_FALLBACK_URL: http://image-processor:8001
+      IMAGE_PROCESSOR_PRIMARY_TIMEOUT: "${IMAGE_PROCESSOR_PRIMARY_TIMEOUT:-120}"
+      IMAGE_PROCESSOR_TIMEOUT: "${IMAGE_PROCESSOR_TIMEOUT:-1800}"
+
+  worker:
+    extends:
+      file: compose.yaml
+      service: worker
+    environment: *preferred-compute
+
+  image-processor:
+    extends:
+      file: compose.compute.yaml
+      service: image-processor
+    # This is the independent fallback: its optional vision stage also stays local.
+  ollama:
+    extends:
+      file: compose.compute.yaml
+      service: ollama
+  ollama-models:
+    extends:
+      file: compose.compute.yaml
+      service: ollama-models
+  db:
+    extends:
+      file: compose.yaml
+      service: db
+  redis:
+    extends:
+      file: compose.yaml
+      service: redis
+
+volumes:
+  mysql-data:
+  redis-data:
+  media-data:
+  static-data:
+  image-model-cache:
+  image-ocr-cache:
+  ollama-data:

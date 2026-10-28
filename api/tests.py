@@ -3,7 +3,9 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 import base64
 import io
+import os
 import tempfile
+import requests
 from unittest.mock import Mock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -12,7 +14,7 @@ from PIL import Image
 from IA_module.ollama_client import OllamaClientError
 
 from .models import ChatMessage, ImageAnnotation, QuizAttempt, UploadedImage, UserNotification
-from .tasks import process_uploaded_image
+from .tasks import process_uploaded_image, _request_processed_image
 
 
 def png_bytes():
@@ -165,6 +167,64 @@ class ImageAccessTests(TestCase):
         self.assertFalse(image.use_ollama)
         enqueue.assert_called_once_with(image.pk)
 
+    def test_manual_upload_edits_and_quizzes_without_any_processing_service(self):
+        with patch('api.tasks.process_uploaded_image.delay') as enqueue, patch('api.tasks.requests.post') as processor:
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.post('/api/imagens/', {
+                    'original_file': uploaded_png(), 'title': 'Manual',
+                    'processing_mode': 'manual', 'use_ollama': 'true',
+                }, format='multipart')
+            self.assertEqual(response.status_code, 201, response.data)
+            image = UploadedImage.objects.get(pk=response.data['id'])
+            self.assertEqual(image.status, UploadedImage.Status.READY)
+            self.assertEqual(image.processing_metadata, {'width': 40, 'height': 20})
+            self.assertFalse(image.use_ollama)
+            self.assertFalse(image.processed_file)
+            self.assertFalse(image.annotations.exists())
+            # Even accidental task delivery or reprocessing cannot activate AI/OCR.
+            process_uploaded_image.run(image.pk)
+            self.assertEqual(self.client.post(f'/api/imagens/{image.pk}/reprocessar/').status_code, 409)
+            enqueue.assert_not_called()
+            processor.assert_not_called()
+
+        response = self.client.put(f'/api/imagens/{image.pk}/rotulos/', {
+            'annotations': [{'label': 'Fêmur manual', 'label_es': 'Fémur manual', 'x': 75, 'y': 50, 'confirmed': True}],
+        }, format='json')
+        self.assertEqual(response.status_code, 200, response.data)
+        annotation = image.annotations.get()
+        self.assertEqual((annotation.x, annotation.y), (30, 10))
+        question = next(item for item in self.client.get('/api/quiz/perguntas/').data if item['image_id'] == image.pk)
+        self.assertEqual(question['imageUrl'], f'/api/imagens/{image.pk}/arquivo/original/')
+        for suffix in ['original', 'processada']:
+            download = self.client.get(f'/api/imagens/{image.pk}/arquivo/{suffix}/')
+            self.assertEqual(download.status_code, 200)
+            self.assertEqual(b''.join(download.streaming_content), png_bytes())
+        answer = self.client.post('/api/quiz/responder/', {
+            'question_id': annotation.pk, 'answer': 'Fémur manual', 'used_open_answer': True,
+        }, format='json')
+        self.assertEqual(answer.status_code, 200, answer.data)
+        self.client.force_authenticate(self.other)
+        self.assertEqual(self.client.get(question['imageUrl']).status_code, 404)
+        self.assertEqual(self.client.put(f'/api/imagens/{image.pk}/rotulos/', {'annotations': []}, format='json').status_code, 404)
+
+    def test_processing_mode_validation_and_manual_ollama_guard(self):
+        bad = self.client.post('/api/imagens/', {
+            'original_file': uploaded_png(), 'processing_mode': 'unknown',
+        }, format='multipart')
+        self.assertEqual(bad.status_code, 400)
+        bad = self.client.patch(f'/api/imagens/{self.private_image.pk}/', {'processing_mode': 'manual'}, format='json')
+        self.assertEqual(bad.status_code, 400)
+        response = self.client.post('/api/imagens/', {
+            'original_file': uploaded_png(), 'processing_mode': 'manual',
+        }, format='multipart')
+        image_id = response.data['id']
+        response = self.client.patch(f'/api/imagens/{image_id}/', {'use_ollama': True}, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.data['use_ollama'])
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.delete(f'/api/imagens/{image_id}/')
+        self.assertFalse(UploadedImage.objects.filter(pk=image_id).exists())
+
     def test_other_user_cannot_list_view_download_or_edit_private_upload(self):
         self.client.force_authenticate(self.other)
         self.assertEqual(self.client.get('/api/imagens/').data, [])
@@ -305,6 +365,42 @@ class ChatTests(TestCase):
         self.assertFalse(any('Conversa privada' in message['content'] for message in messages))
         self.assertEqual(ChatMessage.objects.filter(user=self.user).count(), 4)
 
+    def test_openrouter_chat_and_status_use_selected_provider(self):
+        from IA_module import OpenRouterConfig, StudyAssistant
+        assistant = StudyAssistant(provider='openrouter', openrouter_config=OpenRouterConfig(
+            api_key='test-secret', llm_model='vendor/model',
+        ))
+        ChatMessage.objects.create(user=self.other, role='user', content='Conversa privada')
+        remote = Mock(ok=True, json=lambda: {'choices': [{'message': {'content': 'O fêmur fica na coxa.'}}]})
+        with patch('api.views.study_assistant', assistant):
+            with patch('IA_module.openrouter_client.requests.post', return_value=remote) as post:
+                response = self.client.post('/api/ia/perguntar/', {'pergunta': 'Onde fica o fêmur?'}, format='json')
+            self.assertEqual(response.status_code, 200, response.data)
+            self.assertEqual(response.data['resposta'], 'O fêmur fica na coxa.')
+            self.assertEqual(post.call_args.kwargs['json']['model'], 'vendor/model')
+            self.assertNotIn('Conversa privada', str(post.call_args.kwargs['json']))
+            self.assertEqual(ChatMessage.objects.filter(user=self.user).count(), 2)
+            with patch('IA_module.openrouter_client.requests.get', side_effect=[
+                Mock(ok=True, json=lambda: {'data': {}}),
+                Mock(ok=True, json=lambda: {'data': [{'id': 'vendor/model'}]}),
+            ]), patch('IA_module.openrouter_client.requests.post') as inference:
+                response = self.client.get('/api/ia/status/')
+            self.assertEqual(response.data, {'available': True, 'status': 'ready'})
+            inference.assert_not_called()
+
+    def test_openrouter_failure_returns_503_without_saving_messages_or_exposing_credentials(self):
+        from IA_module import OpenRouterConfig, StudyAssistant
+        assistant = StudyAssistant(provider='openrouter', openrouter_config=OpenRouterConfig(
+            api_key='test-secret', llm_model='vendor/model',
+        ))
+        with patch('api.views.study_assistant', assistant), patch(
+            'IA_module.openrouter_client.requests.post', return_value=Mock(ok=False, status_code=401),
+        ), self.assertLogs('api.views', level='ERROR') as logs:
+            response = self.client.post('/api/ia/perguntar/', {'pergunta': 'Explique'}, format='json')
+        self.assertEqual(response.status_code, 503)
+        self.assertFalse(ChatMessage.objects.filter(user=self.user).exists())
+        self.assertNotIn('test-secret', str(response.data) + str(logs.output))
+
     def test_chat_service_failure_is_reported_without_fake_response_or_history(self):
         with patch('api.views.study_assistant.chat', side_effect=OllamaClientError('offline')):
             with self.assertLogs('api.views', level='ERROR'):
@@ -404,6 +500,69 @@ class ProcessingTaskTests(TestCase):
         self.assertEqual(result['status'], UploadedImage.Status.FAILED)
         self.assertLessEqual(len(UserNotification.objects.get().message), 500)
         self.assertFalse(self.image.processed_file)
+
+    def test_windows_failure_reuploads_complete_file_and_persists_once_locally(self):
+        payload = {'isProcessed': True, 'processed_image_base64': base64.b64encode(png_bytes()).decode(), 'rotules': []}
+        calls = []
+
+        def send(url, **kwargs):
+            calls.append((url, kwargs['files']['file'][1].read(), kwargs['data']))
+            if len(calls) == 1:
+                raise requests.ConnectionError('Windows offline')
+            return Mock(json=lambda: payload)
+
+        with patch.dict(os.environ, {
+            'IMAGE_PROCESSOR_URL': 'http://windows:8081/image-processor',
+            'IMAGE_PROCESSOR_FALLBACK_URL': 'http://image-processor:8001',
+        }), patch('api.tasks.requests.post', side_effect=send), self.assertLogs('api.tasks', level='WARNING'):
+            result = process_uploaded_image.run(self.image.pk)
+        self.assertEqual(result['status'], 'ready')
+        self.image.refresh_from_db()
+        self.assertEqual(self.image.processing_metadata['processor_backend'], 'fallback')
+        self.assertEqual([call[0] for call in calls], [
+            'http://windows:8081/image-processor/process', 'http://image-processor:8001/process',
+        ])
+        self.assertEqual(calls[0][1], png_bytes())
+        self.assertEqual(calls[1][1], png_bytes())
+        self.assertEqual(calls[0][2], calls[1][2])
+        self.assertEqual(UserNotification.objects.count(), 1)
+
+    def test_processor_recovery_retries_primary_and_rejections_do_not_failover(self):
+        response = Mock(json=lambda: {
+            'isProcessed': True, 'processed_image_base64': base64.b64encode(png_bytes()).decode(),
+        })
+        with patch.dict(os.environ, {
+            'IMAGE_PROCESSOR_URL': 'http://windows', 'IMAGE_PROCESSOR_FALLBACK_URL': 'http://local',
+        }), patch('api.tasks.requests.post') as post:
+            post.side_effect = [requests.Timeout(), response, response]
+            with self.assertLogs('api.tasks', level='WARNING'):
+                self.assertEqual(_request_processed_image(self.image)[-1], 'fallback')
+            self.assertEqual(_request_processed_image(self.image)[-1], 'primary')
+            self.assertEqual([call.args[0] for call in post.call_args_list], [
+                'http://windows/process', 'http://local/process', 'http://windows/process',
+            ])
+            post.reset_mock()
+            invalid = requests.HTTPError(response=Mock(status_code=422))
+            post.side_effect = invalid
+            with self.assertRaises(requests.HTTPError):
+                _request_processed_image(self.image)
+            post.assert_called_once()
+
+    def test_bad_processor_payload_or_service_error_falls_back_but_double_failure_raises(self):
+        response = Mock(json=lambda: {
+            'isProcessed': True, 'processed_image_base64': base64.b64encode(png_bytes()).decode(),
+        })
+        with patch.dict(os.environ, {
+            'IMAGE_PROCESSOR_URL': 'http://windows', 'IMAGE_PROCESSOR_FALLBACK_URL': 'http://local',
+        }), patch('api.tasks.requests.post') as post:
+            for failure in [Mock(json=lambda: {'isProcessed': False}), requests.HTTPError(response=Mock(status_code=503)),
+                            requests.HTTPError(response=Mock(status_code=404))]:
+                post.side_effect = [failure, response]
+                with self.assertLogs('api.tasks', level='WARNING'):
+                    self.assertEqual(_request_processed_image(self.image)[-1], 'fallback')
+            post.side_effect = [requests.ConnectionError(), requests.ConnectionError()]
+            with self.assertLogs('api.tasks', level='WARNING'), self.assertRaises(requests.ConnectionError):
+                _request_processed_image(self.image)
 
     def test_deleted_image_and_completed_delivery_do_not_process_again(self):
         self.image.status = UploadedImage.Status.READY

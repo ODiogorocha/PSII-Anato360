@@ -1,0 +1,33 @@
+# Preferred compute on the PC (Windows or Ubuntu WSL).
+# API, database, files and queue live on the server.
+services:
+  backend-gateway:
+    image: nginx:1.27-alpine
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8081}:80"
+    volumes:
+      - ./docker/windows-compute-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  image-processor:
+    extends:
+      file: compose.compute.yaml
+      service: image-processor
+  ollama:
+    extends:
+      file: compose.compute.yaml
+      service: ollama
+  ollama-models:
+    extends:
+      file: compose.compute.yaml
+      service: ollama-models
+
+volumes:
+  image-model-cache:
+  image-ocr-cache:
+  ollama-data:

@@ -11,6 +11,10 @@ class UserProfile(models.Model):
 
 
 class UploadedImage(models.Model):
+    class ProcessingMode(models.TextChoices):
+        AUTOMATIC = 'automatic', 'Automático'
+        MANUAL = 'manual', 'Manual'
+
     class Status(models.TextChoices):
         QUEUED = 'queued', 'Na fila'
         PROCESSING = 'processing', 'Em processamento'
@@ -28,6 +32,7 @@ class UploadedImage(models.Model):
         ('circulatory', 'Circulatório'),
     ])
     use_ollama = models.BooleanField(default=False)
+    processing_mode = models.CharField(max_length=16, choices=ProcessingMode.choices, default=ProcessingMode.AUTOMATIC)
     original_file = models.ImageField(upload_to='user_uploads/originals/')
     processed_file = models.ImageField(upload_to='user_uploads/processed/', blank=True)
     allow_sharing = models.BooleanField(default=False)

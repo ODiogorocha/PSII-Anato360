@@ -5,6 +5,10 @@ O ponto de entrada é `src/App.tsx`; `frontend_anato360/` conserva o protótipo 
 
 ## Executar
 
+Para frontend/backend no servidor e prioridade de IA/imagens no Windows via Tailscale, use
+[o guia de implantação distribuída](../TAILSCALE.md). O navegador continua usando
+`/api/` no domínio público; a API permanece no servidor e seleciona os serviços de cálculo.
+
 Na raiz do repositório, configure `.env` conforme `.env.example` e execute
 `docker compose up -d --build`. Abra <http://localhost> na porta 80.
 
@@ -23,6 +27,7 @@ Em produção o Nginx encaminha `/api/` para o container Django.
 
 - Cadastro/login e permissões recebidas do backend; nenhum e-mail concede acesso administrativo.
 - Upload privado ou compartilhado, processamento assíncrono, revisão de rótulos e notificações.
+- Ajuste manual com a imagem original, criação de todos os rótulos e quiz sem IA ou processador.
 - Quiz de rótulos confirmados, pontuação calculada na API e progresso persistido no MySQL.
 - Chat com histórico por usuário, português/espanhol, contexto de imagem e estado real do assistente.
 - Tema e idioma persistidos no navegador. As imagens são baixadas com autenticação.

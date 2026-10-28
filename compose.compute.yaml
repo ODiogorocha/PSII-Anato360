@@ -1,0 +1,66 @@
+# Stateless compute services shared by server and Windows.
+services:
+  image-processor:
+    build:
+      context: .
+      dockerfile: imageService/Dockerfile
+    environment:
+      IMAGE_OCR_GPU: "${IMAGE_OCR_GPU:-false}"
+      IMAGE_USE_OLLAMA: "${IMAGE_USE_OLLAMA:-false}"
+      IMAGE_VALIDATE_ANATOMY: "${IMAGE_VALIDATE_ANATOMY:-true}"
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_VISION_MODEL: "${OLLAMA_VISION_MODEL:-llama3.2-vision:11b}"
+      OLLAMA_REQUEST_TIMEOUT: "${OLLAMA_REQUEST_TIMEOUT:-300}"
+    volumes:
+      - image-model-cache:/root/.cache
+      - image-ocr-cache:/root/.EasyOCR
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health', timeout=3)"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_KEEP_ALIVE: "${OLLAMA_KEEP_ALIVE:-5m}"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  ollama-models:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_EMBEDDING_MODEL: "${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}"
+      OLLAMA_LLM_MODEL: "${OLLAMA_LLM_MODEL:-llama3.1}"
+      OLLAMA_CHAT_MODEL: "${OLLAMA_CHAT_MODEL:-${OLLAMA_LLM_MODEL:-llama3.1}}"
+      OLLAMA_VISION_MODEL: "${OLLAMA_VISION_MODEL:-llama3.2-vision:11b}"
+      IMAGE_USE_OLLAMA: "${IMAGE_USE_OLLAMA:-false}"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        set -eu;
+        ollama pull "$${OLLAMA_CHAT_MODEL}";
+        ollama pull "$${OLLAMA_EMBEDDING_MODEL}";
+        if [ "$${IMAGE_USE_OLLAMA}" = "true" ] || [ "$${IMAGE_USE_OLLAMA}" = "1" ]; then
+          ollama pull "$${OLLAMA_VISION_MODEL}";
+        fi
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  image-model-cache:
+  image-ocr-cache:
+  ollama-data:

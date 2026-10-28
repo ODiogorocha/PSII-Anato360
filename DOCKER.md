@@ -1,5 +1,48 @@
 # Anato360 com Docker
 
+## Windows + servidor via Tailscale
+
+Para executar frontend e backend no servidor em
+**https://srv-01.tail881f91.ts.net/**, siga [TAILSCALE.md](TAILSCALE.md).
+API, MySQL, arquivos e fila ficam no servidor. IA e processamento de imagens
+priorizam o Windows pelo Tailscale e usam os serviços locais em caso de falha.
+O guia inclui atualização, preparação dos modelos e preservação dos dados.
+
+- Windows: `docker compose -f compose.windows.yaml up -d --build`.
+- Servidor: `docker compose --env-file .env --env-file .env.server -f compose.server.yaml up -d --build`.
+- A opção **Ajustar manualmente**, abaixo de **Processar imagem**, permite criar
+  rótulos na imagem original sem chamar IA ou processamento de imagens.
+
+As seções seguintes descrevem a pilha original em uma única máquina.
+
+## Selecionar Ollama ou OpenRouter para o chat
+
+Em `IA_module/study_assistant.py`, configure `AI_PROVIDER = "ollama"` (padrão)
+ou `AI_PROVIDER = "openrouter"`. Para OpenRouter, preencha `OPENROUTER_MODEL`
+(ID completo do modelo) e `OPENROUTER_API_KEY` no `.env` do backend. Os campos
+`OPENROUTER_EMBEDDING_MODEL` e `OPENROUTER_REQUEST_TIMEOUT` podem manter seus padrões.
+O chat e os PDFs usam o provedor selecionado; o processamento visual opcional
+do `imageService` continua com Ollama. Veja [IA_module/README.md](IA_module/README.md).
+
+O módulo de IA está no container **`api`**. Para incorporar código e `.env`
+alterados, atualize somente esse serviço, na raiz do projeto:
+
+```bash
+docker compose up -d --build --no-deps api
+```
+
+Na implantação servidor + Windows, execute no servidor:
+
+```bash
+docker compose --env-file .env --env-file .env.server -f compose.server.yaml up -d --build --no-deps api
+```
+
+Use o mesmo nome de projeto (`-p`, caso já utilizado). Os demais containers e
+volumes são preservados. No modo OpenRouter, o chat sai diretamente da API para
+o serviço externo; a prioridade Windows/fallback local continua válida para Ollama
+e processamento de imagens. Não é necessário atualizar o container `ollama` para
+trocar o provedor do chat.
+
 A interface em `frontend/` usa os componentes, fontes, cores e layouts do projeto
 Figma enviado em `Website with User Features.zip`. Login, uploads, rótulos, quiz,
 progresso e chat usam a API. `frontend_anato360/` é uma referência anterior.
@@ -160,7 +203,7 @@ Rotas autenticadas exigem `Authorization: Token <token>`.
 | `POST /api/auth/registro/` | Cadastro: nome, email, instituicao, password |
 | `POST /api/auth/login/` | Login: email, password |
 | `GET /api/auth/me/`, `POST /api/auth/logout/` | Conta e encerramento |
-| `GET/POST /api/imagens/` | Lista/upload multipart com original_file, allow_sharing, use_ollama |
+| `GET/POST /api/imagens/` | Lista/upload multipart com original_file, allow_sharing, use_ollama e processing_mode (automatic/manual) |
 | `GET/PATCH/DELETE /api/imagens/{id}/` | Consulta e gerenciamento |
 | `GET /api/imagens/{id}/arquivo/original/` | Download original autenticado |
 | `GET /api/imagens/{id}/arquivo/processada/` | Download processado autenticado |
@@ -172,9 +215,11 @@ Rotas autenticadas exigem `Authorization: Token <token>`.
 
 O chat aceita também `idioma` (`pt`/`es`) e `imagem_id`. O seletor da conversa
 envia o título, a descrição e os rótulos da imagem autorizada como contexto ao
-`IA_module`; não envia pixels. A disponibilidade consulta a
-[lista de modelos do Ollama](https://docs.ollama.com/api/tags), e a conversa usa
-[POST /api/chat](https://docs.ollama.com/api/chat).
+`IA_module`; não envia pixels. Com Ollama, a disponibilidade consulta a
+[lista de modelos](https://docs.ollama.com/api/tags) e a conversa usa
+[POST /api/chat](https://docs.ollama.com/api/chat). Com OpenRouter, o módulo
+verifica chave/catálogo sem inferência e conversa via
+[POST /api/v1/chat/completions](https://openrouter.ai/docs/api/api-reference/chat/create-a-chat-completion).
 
 Os testes de navegador estão em `frontend/tests/site.spec.ts`. Consulte
 [frontend/README.md](frontend/README.md) para executar também as provas com OCR

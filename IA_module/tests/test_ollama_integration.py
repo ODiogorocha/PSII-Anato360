@@ -10,7 +10,7 @@ from IA_module import OllamaClient, OllamaClientError, OllamaConfig, StudyAssist
 
 class OllamaIntegrationTest(unittest.TestCase):
     def setUp(self):
-        self.assistant = StudyAssistant(OllamaConfig(host="http://ollama:11434/", llm_model="chat-model"))
+        self.assistant = StudyAssistant(OllamaConfig(host="http://ollama:11434/", llm_model="chat-model"), provider="ollama")
 
     @patch("IA_module.ollama_client.requests.post")
     def test_chat_without_pdf_preserves_history_and_image_context(self, post):
@@ -106,6 +106,78 @@ class OllamaIntegrationTest(unittest.TestCase):
         post.return_value = Mock(ok=True, json=lambda: {'message': {'content': 'Respuesta'}})
         self.assistant.chat('Explique', language='es')
         self.assertIn('Responda em espanhol', post.call_args.kwargs['json']['messages'][0]['content'])
+
+
+class OllamaFailoverTests(unittest.TestCase):
+    def setUp(self):
+        self.client = OllamaClient(OllamaConfig(
+            host='http://windows:8081/ollama', fallback_host='http://ollama:11434',
+            request_timeout=300, primary_timeout=60,
+        ))
+        self.success = Mock(ok=True, json=lambda: {'message': {'content': 'Resposta'}})
+
+    @patch('IA_module.ollama_client.requests.post')
+    def test_windows_is_preferred_and_recovers_after_local_fallback(self, post):
+        post.side_effect = [requests.ConnectionError(), self.success, self.success]
+        with self.assertLogs('IA_module.ollama_client', level='WARNING'):
+            self.assertEqual(self.client.chat('Sistema', 'Pergunta'), 'Resposta')
+        self.assertEqual(self.client.chat('Sistema', 'Outra pergunta'), 'Resposta')
+        self.assertEqual([call.args[0] for call in post.call_args_list], [
+            'http://windows:8081/ollama/api/chat', 'http://ollama:11434/api/chat',
+            'http://windows:8081/ollama/api/chat',
+        ])
+        self.assertEqual(post.call_args_list[0].kwargs['json'], post.call_args_list[1].kwargs['json'])
+
+    @patch('IA_module.ollama_client.requests.post')
+    def test_unavailable_model_timeout_overload_and_bad_json_use_local_model(self, post):
+        failures = [requests.Timeout(), Mock(ok=False, status_code=404),
+                    Mock(ok=False, status_code=503), Mock(ok=False, status_code=429),
+                    Mock(ok=True, json=Mock(side_effect=ValueError('invalid JSON'))),
+                    Mock(ok=True, json=lambda: {'message': {'content': ''}})]
+        for failure in failures:
+            with self.subTest(failure=failure):
+                post.reset_mock()
+                post.side_effect = [failure, self.success]
+                with self.assertLogs('IA_module.ollama_client', level='WARNING'):
+                    self.assertEqual(self.client.chat('Sistema', 'Pergunta'), 'Resposta')
+                self.assertEqual(post.call_count, 2)
+
+    @patch('IA_module.ollama_client.requests.post')
+    def test_rejected_request_does_not_retry_and_double_failure_is_reported(self, post):
+        post.return_value = Mock(ok=False, status_code=400)
+        with self.assertRaises(OllamaClientError):
+            self.client.chat('Sistema', 'Pergunta')
+        self.assertEqual(post.call_count, 1)
+        post.reset_mock()
+        post.side_effect = [requests.ConnectionError(), requests.ConnectionError()]
+        with self.assertLogs('IA_module.ollama_client', level='WARNING'), self.assertRaises(OllamaClientError):
+            self.client.chat('Sistema', 'Pergunta')
+        self.assertEqual(post.call_count, 2)
+
+    @patch('IA_module.ollama_client.requests.get')
+    def test_status_uses_local_readiness_when_windows_is_missing_the_model(self, get):
+        get.side_effect = [Mock(json=lambda: {'models': []}), Mock(json=lambda: {
+            'models': [{'name': self.client.config.llm_model}],
+        })]
+        self.assertEqual(self.client.chat_status(), {'available': True, 'status': 'ready'})
+        self.assertEqual(get.call_args.args[0], 'http://ollama:11434/api/tags')
+
+    @patch('IA_module.ollama_client.time.monotonic', side_effect=[0, 0, 60])
+    @patch('IA_module.ollama_client.requests.post')
+    def test_attempts_share_the_chat_time_budget(self, post, clock):
+        post.side_effect = [requests.Timeout(), self.success]
+        with self.assertLogs('IA_module.ollama_client', level='WARNING'):
+            self.client.chat('Sistema', 'Pergunta')
+        self.assertEqual(post.call_args_list[0].kwargs['timeout'], (3, 60))
+        self.assertEqual(post.call_args_list[1].kwargs['timeout'], (3, 240))
+
+    @patch('IA_module.ollama_client.requests.post')
+    def test_same_fallback_host_is_not_called_twice(self, post):
+        self.client.config.fallback_host = self.client.config.host
+        post.side_effect = requests.ConnectionError()
+        with self.assertRaises(OllamaClientError):
+            self.client.chat('Sistema', 'Pergunta')
+        post.assert_called_once()
 
 
 if __name__ == "__main__":

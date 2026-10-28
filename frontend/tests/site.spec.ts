@@ -57,6 +57,53 @@ test('cadastro, login, sessão, temas e navegação móvel usam a API real', asy
   expect(errors).toEqual([]);
 });
 
+test('edição manual cria rótulos e quiz sem processamento ou IA', async ({ page, request }, testInfo) => {
+  const headers = await createSession(page, request);
+  let imageId: number | undefined;
+  try {
+    await page.getByRole('button', { name: 'Imagens', exact: true }).click();
+    await page.getByRole('button', { name: '+ Enviar imagem' }).click();
+    await page.locator('input[type=file]').setInputFiles(path.resolve('../imageService/figures/dog_heart.png'));
+    await page.getByPlaceholder('Ex: Cão - Vista lateral').fill('Coração manual E2E');
+    // Selecting optional AI must not affect the separate manual action.
+    await page.getByLabel('Melhorar o resultado com IA após o processamento inicial').check();
+    const automatic = page.getByRole('button', { name: /Processar imagem|Analisar com IA/ });
+    const manual = page.getByRole('button', { name: '✏️ Ajustar manualmente', exact: true });
+    expect((await manual.boundingBox())!.y).toBeGreaterThan((await automatic.boundingBox())!.y);
+    const uploaded = page.waitForResponse(response => response.url().endsWith('/api/imagens/') && response.request().method() === 'POST');
+    await manual.click();
+    const response = await uploaded;
+    expect(response.status()).toBe(201);
+    const image = await response.json();
+    imageId = image.id;
+    expect(image.processing_mode).toBe('manual');
+    expect(image.status).toBe('ready');
+    expect(image.use_ollama).toBe(false);
+    expect(image.annotations).toEqual([]);
+    expect(image.processed_path).toBe('');
+    const canvas = page.getByTestId('annotation-canvas');
+    await expect(canvas).toBeVisible();
+    await expect(canvas.locator('img')).toHaveJSProperty('complete', true);
+    await canvas.click({ position: { x: 110, y: 110 } });
+    await page.getByPlaceholder('Ex: Fêmur').fill('Ventrículo manual');
+    await page.getByPlaceholder('Ej: Fémur').fill('Ventrículo manual ES');
+    await page.getByRole('button', { name: '✓ Confirmar' }).click();
+    await page.screenshot({ path: testInfo.outputPath('manual-editor.png'), fullPage: true });
+    await page.getByRole('button', { name: /1 questões prontas para salvar/ }).click();
+    await expect(page.getByText('Questões salvas com sucesso!', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Imagens', exact: true }).click();
+    await page.getByRole('button', { name: 'Editar rótulos', exact: true }).click();
+    await expect(page.getByPlaceholder('Ex: Fêmur')).toHaveValue('Ventrículo manual');
+    await page.getByRole('button', { name: 'Praticar', exact: true }).click();
+    await expect(page.getByTestId('structure-marker')).toBeVisible();
+    await page.getByPlaceholder('Digite o nome da estrutura...').fill('Ventrículo manual');
+    await page.getByRole('button', { name: 'Verificar', exact: true }).click();
+    await expect(page.getByText('Correto!', { exact: true })).toBeVisible();
+  } finally {
+    if (imageId) await request.delete(`/api/imagens/${imageId}/`, { headers });
+  }
+});
+
 test('upload, OCR, rótulos, quiz, permissões e progresso persistem no MySQL', async ({ page, request }, testInfo) => {
   test.skip(process.env.E2E_PROCESS_IMAGES !== '1', 'Requer os modelos OCR/CLIP e o worker em execução.');
   test.setTimeout(1200000);

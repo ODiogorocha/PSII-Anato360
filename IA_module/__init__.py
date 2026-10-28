@@ -1,11 +1,14 @@
-﻿"""Interface pública do módulo de chat, visão e estudo com Ollama."""
+﻿"""Interface pública de chat/estudo com Ollama ou OpenRouter e visão com Ollama."""
 
-from .config import ChunkingConfig, OllamaConfig, RetrievalConfig
+from .client import AIClientError
+from .config import ChunkingConfig, OllamaConfig, OpenRouterConfig, RetrievalConfig
 from .ollama_client import OllamaClient, OllamaClientError
+from .openrouter_client import OpenRouterClient, OpenRouterClientError
 
 __all__ = [
     "StudyAssistant", "OllamaConfig", "ChunkingConfig", "RetrievalConfig",
     "OllamaClient", "OllamaClientError",
+    "OpenRouterConfig", "OpenRouterClient", "OpenRouterClientError", "AIClientError",
 ]
 
 

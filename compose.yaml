@@ -32,7 +32,7 @@ services:
       DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}"
       CORS_ALLOW_ALL_ORIGINS: "${CORS_ALLOW_ALL_ORIGINS:-false}"
       CORS_ALLOWED_ORIGINS: "${CORS_ALLOWED_ORIGINS:-}"
-      CSRF_TRUSTED_ORIGINS: "${CSRF_TRUSTED_ORIGINS:-http://200.18.75.25,http://localhost,http://127.0.0.1,http://srv-01.tail881f91.ts.net}"
+      CSRF_TRUSTED_ORIGINS: "${CSRF_TRUSTED_ORIGINS:-https://srv-01.tail881f91.ts.net,http://200.18.75.25,http://localhost,http://127.0.0.1,http://srv-01.tail881f91.ts.net}"
       SECURE_SSL_REDIRECT: "${SECURE_SSL_REDIRECT:-false}"
       SESSION_COOKIE_SECURE: "${SESSION_COOKIE_SECURE:-false}"
       CSRF_COOKIE_SECURE: "${CSRF_COOKIE_SECURE:-false}"
@@ -52,11 +52,17 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/1
       IMAGE_PROCESSOR_URL: http://image-processor:8001
+      AI_PROVIDER: "${AI_PROVIDER:-ollama}"
       OLLAMA_HOST: http://ollama:11434
       OLLAMA_EMBEDDING_MODEL: "${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}"
       OLLAMA_LLM_MODEL: "${OLLAMA_LLM_MODEL:-llama3.1}"
       OLLAMA_CHAT_MODEL: "${OLLAMA_CHAT_MODEL:-${OLLAMA_LLM_MODEL:-llama3.1}}"
       OLLAMA_REQUEST_TIMEOUT: "${OLLAMA_REQUEST_TIMEOUT:-300}"
+      # Provedor selecionado em IA_module/study_assistant.py (AI_PROVIDER).
+      OPENROUTER_MODEL: "${OPENROUTER_MODEL:-}"
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      OPENROUTER_EMBEDDING_MODEL: "${OPENROUTER_EMBEDDING_MODEL:-openai/text-embedding-3-small}"
+      OPENROUTER_REQUEST_TIMEOUT: "${OPENROUTER_REQUEST_TIMEOUT:-300}"
     volumes:
       - media-data:/app/media
       - static-data:/app/staticfiles
@@ -93,26 +99,9 @@ services:
     restart: unless-stopped
 
   image-processor:
-    build:
-      context: .
-      dockerfile: imageService/Dockerfile
-    environment:
-      IMAGE_OCR_GPU: "${IMAGE_OCR_GPU:-false}"
-      IMAGE_USE_OLLAMA: "${IMAGE_USE_OLLAMA:-false}"
-      IMAGE_VALIDATE_ANATOMY: "${IMAGE_VALIDATE_ANATOMY:-true}"
-      OLLAMA_HOST: http://ollama:11434
-      OLLAMA_VISION_MODEL: "${OLLAMA_VISION_MODEL:-llama3.2-vision:11b}"
-      OLLAMA_REQUEST_TIMEOUT: "${OLLAMA_REQUEST_TIMEOUT:-300}"
-    volumes:
-      - image-model-cache:/root/.cache
-      - image-ocr-cache:/root/.EasyOCR
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health', timeout=3)"]
-      interval: 20s
-      timeout: 5s
-      retries: 10
-      start_period: 20s
-    restart: unless-stopped
+    extends:
+      file: compose.compute.yaml
+      service: image-processor
 
   db:
     image: mysql:8.4
@@ -145,42 +134,14 @@ services:
     restart: unless-stopped
 
   ollama:
-    image: ollama/ollama:latest
-    environment:
-      OLLAMA_HOST: 0.0.0.0:11434
-      OLLAMA_KEEP_ALIVE: "${OLLAMA_KEEP_ALIVE:-5m}"
-    volumes:
-      - ollama-data:/root/.ollama
-    healthcheck:
-      test: ["CMD", "ollama", "list"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 10s
-    restart: unless-stopped
+    extends:
+      file: compose.compute.yaml
+      service: ollama
 
   ollama-models:
-    image: ollama/ollama:latest
-    environment:
-      OLLAMA_HOST: http://ollama:11434
-      OLLAMA_EMBEDDING_MODEL: "${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}"
-      OLLAMA_LLM_MODEL: "${OLLAMA_LLM_MODEL:-llama3.1}"
-      OLLAMA_CHAT_MODEL: "${OLLAMA_CHAT_MODEL:-${OLLAMA_LLM_MODEL:-llama3.1}}"
-      OLLAMA_VISION_MODEL: "${OLLAMA_VISION_MODEL:-llama3.2-vision:11b}"
-      IMAGE_USE_OLLAMA: "${IMAGE_USE_OLLAMA:-false}"
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - >-
-        set -eu;
-        ollama pull "$${OLLAMA_CHAT_MODEL}";
-        ollama pull "$${OLLAMA_EMBEDDING_MODEL}";
-        if [ "$${IMAGE_USE_OLLAMA}" = "true" ] || [ "$${IMAGE_USE_OLLAMA}" = "1" ]; then
-          ollama pull "$${OLLAMA_VISION_MODEL}";
-        fi
-    depends_on:
-      ollama:
-        condition: service_healthy
-    restart: "no"
+    extends:
+      file: compose.compute.yaml
+      service: ollama-models
 
 volumes:
   mysql-data:

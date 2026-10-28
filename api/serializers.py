@@ -142,7 +142,7 @@ class UploadedImageSerializer(serializers.ModelSerializer):
             'allow_sharing', 'status', 'processing_metadata', 'error_message',
             'created_at', 'processed_at', 'annotations',
             'title', 'title_es', 'description', 'description_es', 'category', 'use_ollama',
-            'original_url', 'processed_url',
+            'original_url', 'processed_url', 'processing_mode',
         ]
         read_only_fields = [
             'id', 'owner_id', 'owner_name', 'original_path', 'processed_path',
@@ -159,6 +159,11 @@ class UploadedImageSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if self.instance is not None and 'original_file' in attrs:
             raise serializers.ValidationError({'original_file': 'Envie uma nova imagem para substituir o arquivo original.'})
+        if self.instance is not None and 'processing_mode' in attrs and attrs['processing_mode'] != self.instance.processing_mode:
+            raise serializers.ValidationError({'processing_mode': 'Escolha o modo ao enviar uma nova imagem.'})
+        mode = attrs.get('processing_mode', self.instance.processing_mode if self.instance else UploadedImage.ProcessingMode.AUTOMATIC)
+        if mode == UploadedImage.ProcessingMode.MANUAL:
+            attrs['use_ollama'] = False
         return attrs
     def validate_original_file(self, value):
         if value.size > 20 * 1024 * 1024:

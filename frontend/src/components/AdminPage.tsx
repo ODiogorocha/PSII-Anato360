@@ -11,7 +11,7 @@ interface Props {
   imageId?: number;
 }
 
-type AdminPhase = 'upload' | 'processing' | 'editing' | 'saved';
+type AdminPhase = 'upload' | 'preparing' | 'processing' | 'editing' | 'saved';
 
 const SYSTEMS: Array<Exclude<AnatomySystem, 'all'>> = [
   'skeletal', 'muscular', 'digestive', 'respiratory', 'circulatory',
@@ -89,7 +89,7 @@ export default function AdminPage({ lang, onSaved, isAdmin, imageId }: Props) {
         label_pt: annotation.text, label_es: annotation.text_es || annotation.text,
         confirmed: !!annotation.confirmed,
       }));
-      setMarkers(detected); setDetectedCount(detected.length);
+      setMarkers(detected); setDetectedCount(uploadedImage.processing_mode === 'manual' ? 0 : detected.length);
       setSelectedId(detected[0]?.id || null); setPhase('editing');
     }).catch(reason => { if (active) { setError(apiError(reason)); setPhase('upload'); } });
     return () => { active = false; if (url) URL.revokeObjectURL(url); };
@@ -116,16 +116,17 @@ export default function AdminPage({ lang, onSaved, isAdmin, imageId }: Props) {
     if (file) loadImage(file);
   };
 
-  const runProcessing = async () => {
+  const runProcessing = async (mode: UploadedImage['processing_mode'] = 'automatic') => {
     if (!file || busy) return;
-    setBusy(true); setPhase('processing'); setProcessingStep(0); setError('');
+    setBusy(true); setPhase(mode === 'manual' ? 'preparing' : 'processing'); setProcessingStep(0); setError('');
     const form = new FormData();
     form.append('original_file', file);
     form.append('title', altPt || file.name);
     form.append('title_es', altEs || altPt || file.name);
     form.append('category', system);
     form.append('allow_sharing', String(allowSharing));
-    form.append('use_ollama', String(useOllama));
+    form.append('processing_mode', mode);
+    form.append('use_ollama', String(mode === 'automatic' && useOllama));
     try {
       const { data } = await api.post<UploadedImage>('imagens/', form, { timeout: 120000 });
       setUploadedImage(data); setProcessingStep(1);
@@ -203,6 +204,7 @@ export default function AdminPage({ lang, onSaved, isAdmin, imageId }: Props) {
 
   const selectedMarker = markers.find(m => m.id === selectedId);
   const confirmedCount = markers.filter(m => m.confirmed && m.label_pt).length;
+  const manualMode = uploadedImage?.processing_mode === 'manual';
 
   const processingMessages = [
     lang === 'pt' ? 'Enviando imagem...' : 'Enviando imagen...',
@@ -230,7 +232,7 @@ export default function AdminPage({ lang, onSaved, isAdmin, imageId }: Props) {
             {tr(lang, 'admin_subtitle')}
           </p>
         </div>
-        {phase !== 'upload' && phase !== 'processing' && (
+        {(phase === 'editing' || phase === 'saved') && (
           <button
             onClick={reset}
             className="text-sm px-4 py-2 rounded-xl border transition-all hover:opacity-70"
@@ -372,10 +374,27 @@ export default function AdminPage({ lang, onSaved, isAdmin, imageId }: Props) {
                 <span>🤖</span>
                 <span>{tr(lang, 'admin_analyze')}</span>
               </button>
+              <button
+                disabled={busy}
+                onClick={() => void runProcessing('manual')}
+                className="w-full py-3.5 rounded-xl border font-semibold text-sm transition-all hover:opacity-90 disabled:opacity-50"
+                style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}
+              >
+                ✏️ Ajustar manualmente
+              </button>
+              <p className="text-xs text-center" style={{ color: 'var(--muted-fg)' }}>
+                {lang === 'pt'
+                  ? 'Crie todos os rótulos na imagem original, sem IA ou processamento automático. Textos existentes na imagem serão mantidos.'
+                  : 'Cree todas las etiquetas en la imagen original, sin IA ni procesamiento automático. Se conservarán los textos existentes en la imagen.'}
+              </p>
             </div>
           )}
         </div>
       )}
+
+      {phase === 'preparing' && <div role="status" className="max-w-2xl mx-auto rounded-2xl p-8 text-center" style={{ background: 'var(--card)', color: 'var(--muted-fg)' }}>
+        {lang === 'pt' ? 'Enviando imagem e abrindo o editor manual...' : 'Enviando imagen y abriendo el editor manual...'}
+      </div>}
 
       {/* PROCESSING phase */}
       {phase === 'processing' && (
@@ -473,6 +492,7 @@ export default function AdminPage({ lang, onSaved, isAdmin, imageId }: Props) {
 
             <div
               ref={imgRef}
+              data-testid="annotation-canvas"
               className="relative rounded-2xl overflow-hidden cursor-crosshair select-none"
               style={{ background: 'var(--muted)' }}
               onClick={handleImageClick}
@@ -552,17 +572,17 @@ export default function AdminPage({ lang, onSaved, isAdmin, imageId }: Props) {
 
             {/* AI badge + count */}
             <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--muted-fg)' }}>
-              <span
+              {!manualMode && <span
                 className="px-2.5 py-1 rounded-full font-medium"
                 style={{ background: 'var(--muted)', color: 'var(--primary)' }}
               >
                 🤖 {detectedCount} {tr(lang, 'admin_ai_badge')}
-              </span>
+              </span>}
               <span
                 className="px-2.5 py-1 rounded-full font-medium"
                 style={{ background: 'var(--muted)', color: 'var(--muted-fg)' }}
               >
-                ✏️ {markers.filter(m => !/^\d+$/.test(m.id)).length} {tr(lang, 'admin_manual_badge')}
+                ✏️ {manualMode ? markers.length : markers.filter(m => !/^\d+$/.test(m.id)).length} {tr(lang, 'admin_manual_badge')}
               </span>
               <span className="ml-auto">
                 {markers.length} {lang === 'pt' ? 'marcadores' : 'marcadores'}

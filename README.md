@@ -2,6 +2,14 @@
 
 ## Executar o sistema
 
+**Servidor completo com processamento preferencial no Windows via Tailscale:** veja
+[TAILSCALE.md](TAILSCALE.md) para os comandos de instalação, atualização e migração
+de dados. API, MySQL e arquivos ficam no servidor; IA/imagens usam os serviços locais
+se o Windows falhar. O site continua em `https://srv-01.tail881f91.ts.net/`. O envio de imagens
+também oferece **Ajustar manualmente** para criar rótulos sem IA ou processamento.
+
+Para executar tudo em uma única máquina:
+
 O frontend em `frontend/` segue o design Figma enviado. API Django, MySQL,
 processamento de imagens, fila e Ollama rodam em containers separados.
 
@@ -14,6 +22,11 @@ docker compose up -d --build
 Acesse <http://localhost> (porta 80). O mesmo frontend atende os hosts
 `127.0.0.1`, `200.18.75.25` e `srv-01.tail881f91.ts.net` configurados no ambiente.
 Consulte [DOCKER.md](DOCKER.md) para arquitetura, modelos, banco, API e testes.
+
+O chat aceita **Ollama ou OpenRouter**: selecione `AI_PROVIDER` em
+`IA_module/study_assistant.py`. Para OpenRouter, preencha `OPENROUTER_MODEL` e
+`OPENROUTER_API_KEY` no `.env`. A configuração e o comando para atualizar apenas
+o container da API estão em [IA_module/README.md](IA_module/README.md).
 
 
 ## Desenvolvedores

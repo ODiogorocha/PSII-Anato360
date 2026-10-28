@@ -37,6 +37,7 @@ export interface UploadedImage {
   owner_name: string;
   allow_sharing: boolean;
   use_ollama: boolean;
+  processing_mode: 'automatic' | 'manual';
   status: 'queued' | 'processing' | 'ready' | 'failed';
   processed_path: string;
   annotations: ImageAnnotation[];
