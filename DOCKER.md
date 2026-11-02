@@ -6,6 +6,8 @@ O `compose.yaml` inicia três componentes:
 - o Ollama;
 - uma tarefa de inicialização que baixa os modelos configurados.
 
+O frontend incluído na imagem é o da pasta `frontend_anato360/`.
+
 ## Início rápido
 
 ```bash

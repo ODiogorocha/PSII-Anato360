@@ -4,15 +4,13 @@ FROM node:24-alpine AS frontend-builder
 
 WORKDIR /build/frontend
 
-COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+COPY frontend_anato360/package.json frontend_anato360/pnpm-lock.yaml ./
+RUN corepack enable \
+    && corepack pnpm install --frozen-lockfile
 
-COPY frontend/ ./
+COPY frontend_anato360/ ./
 
-ARG VITE_API_BASE_URL=/api/
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
-
-RUN npm run build
+RUN corepack pnpm build
 
 
 FROM python:3.13-slim AS runtime
@@ -41,7 +39,8 @@ COPY docker/nginx.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisor/supervisord.conf
 COPY docker/entrypoint.sh /app/docker/entrypoint.sh
 
-RUN chmod +x /app/docker/entrypoint.sh \
+RUN sed -i 's/\r$//' /app/docker/entrypoint.sh \
+    && chmod +x /app/docker/entrypoint.sh \
     && mkdir -p /app/data /app/media /app/staticfiles
 
 EXPOSE 80

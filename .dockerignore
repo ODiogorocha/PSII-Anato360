@@ -9,11 +9,15 @@
 !backend/**
 !IA_module/
 !IA_module/**
+!frontend_anato360/
+!frontend_anato360/**
 !frontend/
 !frontend/**
 !docker/
 !docker/**
 frontend/node_modules/
 frontend/dist/
+frontend_anato360/node_modules/
+frontend_anato360/dist/
 **/__pycache__/
 **/*.py[cod]
