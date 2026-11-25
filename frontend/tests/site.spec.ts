@@ -44,10 +44,12 @@ test('cadastro, login, sessão, temas e navegação móvel usam a API real', asy
   await page.getByRole('button', { name: 'PT', exact: true }).click();
   await page.getByRole('button', { name: 'Toggle theme' }).click();
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Menu de navegação' }).click();
   await page.getByRole('button', { name: 'Imagens', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Biblioteca de imagens' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   await page.screenshot({ path: testInfo.outputPath('mobile.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Menu de navegação' }).click();
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Bem-vindo ao Anato360' })).toBeVisible();
   await page.locator('input[type=email]').fill(email);

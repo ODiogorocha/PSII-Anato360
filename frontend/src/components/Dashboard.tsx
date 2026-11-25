@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import type { Language, UserStats, AppUser, AnatomySystem } from '../lib/types';
 import { tr, systemName, systemDesc } from '../lib/translations';
+import { api, type UploadedImage } from '../services/api';
 
 interface Props {
   lang: Language;
@@ -31,6 +33,19 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
 }
 
 export default function Dashboard({ lang, stats, user, customQuestionsCount, onStartQuiz }: Props) {
+  const [counts, setCounts] = useState<Record<string, number> | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    api.get<UploadedImage[]>('imagens/', { signal: controller.signal }).then(({ data }) => {
+      const next: Record<string, number> = {};
+      for (const image of data) {
+        if (image.status !== 'ready') continue;
+        next[image.category] = (next[image.category] || 0) + image.annotations.filter(item => item.confirmed).length;
+      }
+      setCounts(next);
+    }).catch(() => { if (!controller.signal.aborted) setCounts(null); });
+    return () => controller.abort();
+  }, [customQuestionsCount]);
   const correct = stats.results.filter(r => r.correct).length;
   const total = stats.results.length;
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
@@ -69,8 +84,9 @@ export default function Dashboard({ lang, stats, user, customQuestionsCount, onS
 
       {/* All systems card */}
       <button
+        type="button"
         onClick={() => onStartQuiz('all')}
-        className="w-full mb-6 rounded-2xl p-6 text-left transition-all hover:opacity-90 active:scale-[0.99]"
+        className="w-full min-h-44 mb-6 rounded-2xl p-6 text-left transition-all hover:opacity-90 active:scale-[0.99]"
         style={{ background: 'var(--primary)', color: 'var(--primary-fg)' }}
       >
         <div className="flex items-center justify-between">
@@ -78,14 +94,12 @@ export default function Dashboard({ lang, stats, user, customQuestionsCount, onS
             <div className="text-2xl mb-2">🐾</div>
             <h2 className="font-display text-2xl mb-1">{systemName(lang, 'all')}</h2>
             <p className="text-sm opacity-80">{systemDesc(lang, 'all')}</p>
-            {customQuestionsCount > 0 && (
-              <div className="mt-2 text-xs font-medium opacity-90">
-                {customQuestionsCount} {lang === 'pt' ? 'questões disponíveis' : 'preguntas disponibles'}
-              </div>
-            )}
+            <div className="mt-2 text-xs font-medium opacity-90">
+              {customQuestionsCount} {lang === 'pt' ? 'questões disponíveis' : 'preguntas disponibles'}
+            </div>
           </div>
           <div
-            className="hidden md:flex flex-col items-center justify-center w-16 h-16 rounded-2xl text-2xl"
+            className="flex shrink-0 flex-col items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl text-2xl"
             style={{ background: 'rgba(255,255,255,0.15)' }}
           >
             →
@@ -98,8 +112,9 @@ export default function Dashboard({ lang, stats, user, customQuestionsCount, onS
         {systems.map(sys => (
           <button
             key={sys.id}
+            type="button"
             onClick={() => onStartQuiz(sys.id)}
-            className="rounded-2xl p-6 text-left transition-all hover:opacity-90 active:scale-[0.99] group"
+            className="min-h-44 rounded-2xl p-6 text-left transition-all hover:opacity-90 active:scale-[0.99] group"
             style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
           >
             <div
@@ -114,6 +129,7 @@ export default function Dashboard({ lang, stats, user, customQuestionsCount, onS
             <p className="text-xs" style={{ color: 'var(--muted-fg)' }}>
               {systemDesc(lang, sys.id)}
             </p>
+            {counts && <p className="mt-2 text-xs" style={{ color: 'var(--muted-fg)' }}>{counts[sys.id] || 0} {lang === 'pt' ? 'questões disponíveis' : 'preguntas disponibles'}</p>}
             <div
               className="mt-4 text-xs font-semibold"
               style={{ color: sys.color }}

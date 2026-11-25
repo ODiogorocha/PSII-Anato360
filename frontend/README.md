@@ -3,6 +3,23 @@
 Interface React/TypeScript baseada no código exportado em `Website with User Features.zip`.
 O ponto de entrada é `src/App.tsx`; `frontend_anato360/` conserva o protótipo anterior.
 
+As melhorias de `frontend_anato360_new/` foram integradas nesta pasta: menu móvel,
+foco por teclado, contagem de questões por sistema, filtro na biblioteca e estudo
+de rótulos com zoom, rotação e restauração da imagem. Os dados vêm da API existente;
+somente rótulos confirmados de imagens prontas entram nas contagens de questões.
+O protótipo novo permanece como referência, pois contém arquivos incompletos e
+fluxos simulados. O Docker continua compilando `frontend/`.
+
+Para atualizar somente a interface no servidor, na raiz do projeto:
+
+```bash
+docker compose --env-file .env --env-file .env.server -f compose.server.yaml up -d --build --no-deps frontend
+```
+
+Na instalação com `compose.yaml`, use `docker compose up -d --build --no-deps frontend`.
+Mantenha o mesmo nome de projeto (`-p`, se utilizado na instalação). Esses comandos
+recriam apenas o frontend; não exigem alterações no backend nem migrações do banco.
+
 ## Executar
 
 Para frontend/backend no servidor e prioridade de IA/imagens no Windows via Tailscale, use
@@ -45,6 +62,11 @@ npm run test:e2e
 ```
 
 O Playwright usa o site Docker real na porta 80. `E2E_BASE_URL` altera o endereço.
+`tests/ui-integration.spec.ts` valida as melhorias da interface com respostas
+controladas da API (autenticação, permissões de interface, filtros, zoom e quiz).
+Pode ser executado contra o Vite local com `E2E_BASE_URL=http://127.0.0.1:4173` e
+`npx playwright test ui-integration.spec.ts`; ele não substitui a suíte com API real
+em `tests/site.spec.ts`.
 Ative `E2E_PROCESS_IMAGES=1` para testar upload/OCR/quiz e `E2E_CHAT=1` para
 testar uma resposta real do Ollama. Os testes longos exigem os modelos instalados;
 o teste de imagens aceita até 20 minutos para o primeiro download de pesos.

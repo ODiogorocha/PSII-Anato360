@@ -194,7 +194,7 @@ export default function QuizPage({ lang, system, onComplete, onBack }: Props) {
 
         <button
           onClick={() => onComplete(sessionResults)}
-          className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
+          className="min-h-11 w-full py-3.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
           style={{ background: 'var(--primary)', color: 'var(--primary-fg)' }}
         >
           {tr(lang, 'backToDashboard')}
@@ -206,10 +206,10 @@ export default function QuizPage({ lang, system, onComplete, onBack }: Props) {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <button
           onClick={onBack}
-          className="text-sm flex items-center gap-1 hover:opacity-70 transition-all"
+          className="min-h-11 text-sm flex items-center gap-1 hover:opacity-70 transition-all"
           style={{ color: 'var(--muted-fg)' }}
         >
           ← {tr(lang, 'backToDashboard')}
@@ -220,7 +220,12 @@ export default function QuizPage({ lang, system, onComplete, onBack }: Props) {
           </span>
           {/* Progress bar */}
           <div
-            className="w-32 h-1.5 rounded-full overflow-hidden"
+            role="progressbar"
+            aria-label={`${tr(lang, 'questionOf')} ${index + 1} ${tr(lang, 'of')} ${questions.length}`}
+            aria-valuemin={0}
+            aria-valuemax={questions.length}
+            aria-valuenow={index + 1}
+            className="w-20 sm:w-32 h-1.5 rounded-full overflow-hidden"
             style={{ background: 'var(--muted)' }}
           >
             <div
@@ -237,6 +242,7 @@ export default function QuizPage({ lang, system, onComplete, onBack }: Props) {
       {error && <p role="alert" className="mb-4 text-sm" style={{ color: 'var(--accent)' }}>{error}</p>}
       {/* 360° Viewer */}
       <Viewer360
+        key={q.id}
         imageUrl={imageUrl}
         imageAlt={lang === 'pt' ? q.imageAlt_pt : q.imageAlt_es}
         marker={q.marker}
@@ -287,7 +293,7 @@ export default function QuizPage({ lang, system, onComplete, onBack }: Props) {
             </div>
             <button
               onClick={handleNext}
-              className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
+              className="min-h-11 w-full py-3.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
               style={{ background: 'var(--primary)', color: 'var(--primary-fg)' }}
             >
               {index + 1 >= questions.length
@@ -309,17 +315,18 @@ export default function QuizPage({ lang, system, onComplete, onBack }: Props) {
               <span className="font-medium">{tr(lang, 'openBonus')}</span>
             </div>
 
-            <label className="block text-sm font-medium" style={{ color: 'var(--muted-fg)' }}>
+            <label htmlFor="quiz-answer" className="block text-sm font-medium" style={{ color: 'var(--muted-fg)' }}>
               {tr(lang, 'openAnswerLabel')}
             </label>
             <input
               ref={inputRef}
+              id="quiz-answer"
               type="text"
               value={openInput}
               onChange={e => setOpenInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleOpenSubmit()}
               placeholder={tr(lang, 'openAnswerPlaceholder')}
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+              className="min-h-11 w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
               style={{
                 background: 'var(--muted)',
                 color: 'var(--fg)',
@@ -333,7 +340,7 @@ export default function QuizPage({ lang, system, onComplete, onBack }: Props) {
               <button
                 onClick={handleOpenSubmit}
                 disabled={!openInput.trim() || busy}
-                className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90 disabled:opacity-40"
+                className="min-h-11 flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90 disabled:opacity-40"
                 style={{ background: 'var(--primary)', color: 'var(--primary-fg)' }}
               >
                 {busy ? '...' : tr(lang, 'checkAnswer')}
@@ -341,7 +348,7 @@ export default function QuizPage({ lang, system, onComplete, onBack }: Props) {
               <button
                 onClick={handleReveal}
                 disabled={busy}
-                className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-80 border"
+                className="min-h-11 flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-80 border"
                 style={{
                   background: 'transparent',
                   color: 'var(--muted-fg)',
@@ -377,7 +384,7 @@ export default function QuizPage({ lang, system, onComplete, onBack }: Props) {
                   key={option}
                   onClick={() => handleOptionSelect(option)}
                   disabled={selectedOption !== null || busy}
-                  className="w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium transition-all hover:opacity-80 disabled:cursor-default"
+                  className="min-h-11 w-full text-left px-4 py-3.5 rounded-xl text-sm font-medium transition-all hover:opacity-80 disabled:cursor-default"
                   style={{
                     background: bg,
                     color,

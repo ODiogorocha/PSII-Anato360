@@ -32,6 +32,7 @@ export interface UploadedImage {
   title: string;
   title_es?: string;
   description: string;
+  description_es?: string;
   category: string;
   owner_id: number;
   owner_name: string;

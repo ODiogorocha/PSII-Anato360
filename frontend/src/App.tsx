@@ -97,7 +97,7 @@ export default function App() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--fg)' }}>
       <Navbar lang={lang} theme={theme} user={user} view={view} stats={stats} isAdmin={!!user.isAdmin} onNavigate={navigate} onToggleLang={toggleLang} onToggleTheme={toggleTheme} onLogout={() => { void handleLogout().catch(() => {}); }} />
-      <main className="pt-16 pb-20 md:pb-0">
+      <main className="pt-16 pb-6">
         {error && <div role="alert" className="max-w-5xl mx-auto px-4 pt-5 text-sm" style={{ color: 'var(--accent)' }}>{error} <button onClick={() => void refreshStats()} className="underline">{lang === 'pt' ? 'Tentar novamente' : 'Reintentar'}</button></div>}
         {view === 'dashboard' && <Dashboard lang={lang} stats={stats} user={user} customQuestionsCount={questionsCount} onStartQuiz={system => { setQuizSystem(system); setView('quiz'); }} />}
         {view === 'quiz' && <QuizPage lang={lang} system={quizSystem} onComplete={() => navigate('dashboard')} onBack={() => navigate('dashboard')} />}

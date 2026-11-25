@@ -13,10 +13,14 @@
 !imageService/**
 !frontend/
 !frontend/**
+!frontend_anato360_new/
+!frontend_anato360_new/**
 !docker/
 !docker/**
 frontend/node_modules/
 frontend/dist/
+frontend_anato360_new/node_modules/
+frontend_anato360_new/dist/
 frontend/test-results/
 frontend/playwright-report/
 **/__pycache__/
